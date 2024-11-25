@@ -1,0 +1,1558 @@
+@charset "UTF-8";* {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+a,abbr,acronym,address,applet,article,aside,audio,b,big,blockquote,body,canvas,caption,center,cite,code,dd,del,details,dfn,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,output,p,pre,q,ruby,s,samp,section,small,span,strike,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,tt,u,ul,var,video {
+    margin: 0;
+    padding: 0;
+    border: 0
+}
+
+a {
+    text-decoration: none;
+    display: inline-block
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px
+}
+
+.containerP0 {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0
+}
+
+body {
+    margin: auto;
+    padding: 0;
+    font: 16px Helvetica,Arial,sans-serif;
+    max-width: 1920px;
+    min-width: 320px;
+    color: #000
+}
+
+:root {
+    --mainColor: #2a66a1;
+}
+
+.locksmithService {
+    margin-top: 50px
+}
+
+.locksmithService__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.locksmithService__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.locksmithService__txt {
+    line-height: 20px
+}
+
+.locksmithService__right {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.locksmithService__img {
+    width: 100%;
+    height: 100P
+}
+
+.multiPoint {
+    margin-top: 50px
+}
+
+.multiPoint__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.multiPoint__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.multiPoint__txt {
+    line-height: 20px
+}
+
+.multiPoint__right {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.multiPoint__img {
+    width: 100%;
+    height: 100%
+}
+
+.paymentMethod {
+    margin-top: 50px
+}
+
+.paymentMethod__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.paymentMethod__inner {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[5];
+    grid-template-columns: repeat(5,1fr);
+    gap: 50px
+}
+
+.paymentMethod__img {
+    width: 100%;
+    height: 100%
+}
+
+.frontDoorLockBroken {
+    margin-top: 50px
+}
+
+.frontDoorLockBroken__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px;
+    background-color: var(--mainColor);
+    color: #fff;
+    padding: 20px 10px;
+    border-radius: 5px
+}
+
+.frontDoorLockBroken__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.frontDoorLockBroken__txt {
+    line-height: 20px
+}
+
+.frontDoorLockBroken__right {
+    text-align: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.frontDoorLockBroken__tel {
+    background-color: var(--mainColor);
+    padding: 30px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px;
+    position: relative;
+    min-width: 300px;
+    border: 1px solid #fff
+}
+
+.frontDoorLockBroken__tel::after {
+    content: "24 Stunden Hotline - Jetzt anrufen!";
+    position: absolute;
+    font-size: 14px;
+    width: 300px;
+    top: 5px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.frontDoorLockBroken__tel span {
+    position: relative
+}
+
+.frontDoorLockBroken__tel span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.frontDoorLockBroken__tel:hover {
+    color: #f6f3f0
+}
+
+.keyEmergencyService {
+    margin-top: 50px
+}
+
+.keyEmergencyService__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.keyEmergencyService__wrp {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.keyEmergencyService__inner {
+    border: 1px solid #000;
+    border-radius: 5px;
+    padding: 10px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    gap: 20px;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between
+}
+
+.keyEmergencyService__imgWrp {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.keyEmergencyService__img {
+    width: 100%;
+    height: 400px;
+    -o-object-fit: contain;
+    object-fit: contain
+}
+
+.keyEmergencyService__subTitle {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center
+}
+
+.keyEmergencyService__txt {
+    line-height: 20px
+}
+
+.keyEmergencyService__bottom {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    gap: 10px
+}
+
+.keyEmergencyService__link {
+    color: var(--mainColor);
+    font-weight: 700
+}
+
+.keyEmergencyService__tel {
+    background-color: var(--mainColor);
+    padding: 10px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px
+}
+
+.keyEmergencyService__tel span {
+    position: relative
+}
+
+.keyEmergencyService__tel span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.keyEmergencyService__tel:hover {
+    color: #f6f3f0
+}
+
+.colorBlock {
+    margin-top: 50px
+}
+
+.colorBlock__box {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    gap: 50px;
+    background-color: var(--mainColor);
+    color: #fff;
+    padding: 20px 10px;
+    border-radius: 5px
+}
+
+.colorBlock__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.colorBlock__txt {
+    line-height: 20px
+}
+
+.montage {
+    margin-top: 50px
+}
+
+.montage__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.montage__left {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.montage__img {
+    width: 100%;
+    height: 100%
+}
+
+.montage__right {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    gap: 20px
+}
+
+.montage__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.montage__txt {
+    line-height: 30px
+}
+
+.montage__txt a {
+    font-weight: 700
+}
+
+.montage__linkWrp {
+    text-align: center
+}
+
+.montage__tel {
+    background-color: var(--mainColor);
+    padding: 30px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px;
+    position: relative;
+    min-width: 300px
+}
+
+.montage__tel::after {
+    content: "24 Stunden Hotline - Jetzt anrufen!";
+    position: absolute;
+    font-size: 14px;
+    width: 300px;
+    top: 5px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.montage__tel span {
+    position: relative
+}
+
+.montage__tel span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.montage__tel:hover {
+    color: #f6f3f0
+}
+
+.defaultPages {
+    margin-top: 50px
+}
+
+.defaultPages__box {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.defaultPages__title {
+    color: #000;
+    text-align: left;
+    font-weight: 700;
+    font-size: clamp(30px,5vw,35px);
+    text-align: center;
+    margin-bottom: 30px
+}
+
+.defaultPages__wrp {
+    background-color: var(--mainColor);
+    color: #fff;
+    border-radius: 5px;
+    padding: 20px 10px;
+    width: 100%;
+    max-width: 768px;
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.defaultPages__left {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    gap: 30px
+}
+
+.defaultPages__inner {
+    line-height: 30px
+}
+
+.defaultPages__imgWrp {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.defaultPages__img {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #fff
+}
+
+.defaultPages__right {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    gap: 20px;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between
+}
+
+.defaultPages__subTitle {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px);
+    margin-bottom: 0
+}
+
+.defaultPages__ul {
+    font-weight: 700;
+    list-style: disc;
+    list-style-position: inside;
+    line-height: 20px
+}
+
+.defaultPages__linkWrp {
+    text-align: center
+}
+
+.defaultPages__tel {
+    background-color: var(--mainColor);
+    padding: 30px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px;
+    position: relative;
+    min-width: 300px;
+    border: 1px solid #fff
+}
+
+.defaultPages__tel::after {
+    content: "24 Stunden Hotline - Jetzt anrufen!";
+    position: absolute;
+    font-size: 14px;
+    width: 300px;
+    top: 5px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.defaultPages__tel span {
+    position: relative
+}
+
+.defaultPages__tel span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.defaultPages__tel:hover {
+    color: #f6f3f0
+}
+
+.time__box {
+    margin-top: 50px
+}
+
+.time__txt {
+    line-height: 30px
+}
+
+.defaultPages2 {
+    margin-top: 50px
+}
+
+.defaultPages2__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.defaultPages2__left {
+    max-width: 100%;
+    max-height: 100%;
+    text-align: center
+}
+
+.defaultPages2__img {
+    width: 100%;
+    height: 100%;
+    -o-object-fit: contain;
+    object-fit: contain;
+    max-height: 500px;
+    max-width: 400px
+}
+
+.defaultPages2__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.defaultPages2__txt {
+    line-height: 25px
+}
+
+.header {
+    margin-top: 20px
+}
+
+.header__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.header__subTitle {
+    font-size: 16px;
+    font-weight: 700;
+    padding-left: 35px;
+    position: relative;
+    margin-bottom: 20px
+}
+
+.header__subTitle::before {
+    content: "";
+    position: absolute;
+    background-image: url(../img/Bildschirmfoto.png);
+    background-size: cover;
+    width: 30px;
+    height: 30px;
+    left: 0;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.header__imgWrp {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.header__img {
+    width: 100%;
+    height: 100%
+}
+
+.header__right {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    gap: 20px;
+    -webkit-box-pack: space-evenly;
+    -ms-flex-pack: space-evenly;
+    justify-content: space-evenly
+}
+
+.header__title {
+    color: #000;
+    text-align: left;
+    font-weight: 700;
+    font-size: clamp(30px,5vw,35px)
+}
+
+.header__ul {
+    list-style-type: disc;
+    list-style-position: inside;
+    line-height: 30px
+}
+
+.header__tel {
+    background-color: var(--mainColor);
+    padding: 10px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px
+}
+
+.header__tel span {
+    position: relative
+}
+
+.header__tel span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.header__tel:hover {
+    color: #f6f3f0
+}
+
+.locksmith {
+    margin-top: 50px
+}
+
+.locksmith__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.locksmith__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.locksmith__txt {
+    line-height: 20px
+}
+
+.locksmith__right {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.locksmith__img {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #000
+}
+
+.price {
+    margin-top: 50px
+}
+
+.price__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: 1fr;
+    grid-template-columns: 1fr;
+    gap: 20px
+}
+
+.price__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.price__wrapper {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[3];
+    grid-template-columns: repeat(3,1fr);
+    gap: 40px
+}
+
+.price__inner {
+    border: 1px solid #000;
+    padding: 5px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    gap: 50px;
+    padding-bottom: 30px
+}
+
+.price__imgWrp {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.price__img {
+    width: 100%;
+    min-height: 250px;
+    height: 100%;
+    -o-object-fit: cover;
+    object-fit: cover
+}
+
+.price__ul {
+    list-style: disc;
+    list-style-position: inside;
+    padding-left: 20px;
+    font-weight: 700;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    gap: 10px
+}
+
+.price__innerBottom {
+    font-weight: 700;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 10px
+}
+
+.price__linkPage {
+    color: var(--mainColor)
+}
+
+.price__price {
+    color: #fff;
+    background-color: var(--mainColor);
+    padding: 7px 10px
+}
+
+.price__telWrp {
+    text-align: center
+}
+
+.tell {
+    background-color: var(--mainColor);
+    padding: 30px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px;
+    position: relative;
+    min-width: 300px
+}
+
+.tell::after {
+    content: "24 Stunden Hotline - Jetzt anrufen!";
+    position: absolute;
+    font-size: 14px;
+    width: 300px;
+    top: 5px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.tell span {
+    position: relative
+}
+
+.tell span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.tell:hover {
+    color: #f6f3f0
+}
+
+.aufsperrdienst {
+    margin-top: 50px
+}
+
+.aufsperrdienst__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.aufsperrdienst__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.aufsperrdienst__txt {
+    line-height: 20px
+}
+
+.aufsperrdienst__right {
+    background-color: var(--mainColor);
+    padding: 10px;
+    color: #fff;
+    border-radius: 5px
+}
+
+.clock {
+    margin-top: 50px
+}
+
+.clock__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.clock__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.clock__txt {
+    line-height: 20px
+}
+
+.clock__right {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center
+}
+
+.clock__img {
+    max-width: 40%
+}
+
+.keyService {
+    margin-top: 50px
+}
+
+.keyService__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px
+}
+
+.keyService__left {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.keyService__img {
+    -o-object-fit: cover;
+    object-fit: cover;
+    width: 100%;
+    height: 100%
+}
+
+.keyService__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.keyService__txt {
+    line-height: 20px
+}
+
+.keyService__tellWrp {
+    text-align: center;
+    margin-top: 20px
+}
+
+.keyService__tell {
+    background-color: var(--mainColor);
+    padding: 30px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px;
+    position: relative;
+    min-width: 300px
+}
+
+.keyService__tell::after {
+    content: "24 Stunden Hotline - Jetzt anrufen!";
+    position: absolute;
+    font-size: 14px;
+    width: 300px;
+    top: 5px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.keyService__tell span {
+    position: relative
+}
+
+.keyService__tell span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.keyService__tell:hover {
+    color: #f6f3f0
+}
+
+.titleP {
+    margin-top: 50px
+}
+
+.titleP__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.titleP__txt {
+    line-height: 20px
+}
+
+.titleP__inner {
+    margin-top: 50px
+}
+
+.titleP__subTitle {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px);
+    font-size: clamp(18px,5vw,20px)
+}
+
+.titleP__inner2 {
+    text-align: center;
+    margin-top: 30px
+}
+
+.titleP__tel {
+    background-color: var(--mainColor);
+    padding: 30px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px;
+    position: relative;
+    min-width: 300px
+}
+
+.titleP__tel::after {
+    content: "24 Stunden Hotline - Jetzt anrufen!";
+    position: absolute;
+    font-size: 14px;
+    width: 300px;
+    top: 5px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.titleP__tel span {
+    position: relative
+}
+
+.titleP__tel span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.titleP__tel:hover {
+    color: #f6f3f0
+}
+
+.callCenter {
+    margin-top: 50px
+}
+
+.callCenter__box {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[2];
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px;
+    text-align: center
+}
+
+.callCenter__left {
+    max-width: 100%;
+    max-height: 100%
+}
+
+.callCenter__img {
+    width: 148px
+}
+
+.callCenter__right {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    text-align: center
+}
+
+.callCenter__tel {
+    background-color: var(--mainColor);
+    padding: 30px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px;
+    position: relative;
+    min-width: 300px
+}
+
+.callCenter__tel::after {
+    content: "24 Stunden Hotline - Jetzt anrufen!";
+    position: absolute;
+    font-size: 14px;
+    width: 300px;
+    top: 5px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.callCenter__tel span {
+    position: relative
+}
+
+.callCenter__tel span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.callCenter__tel:hover {
+    color: #f6f3f0
+}
+
+.emergencyLocksmithService {
+    margin-top: 50px
+}
+
+.emergencyLocksmithService__box {
+    background-color: var(--mainColor);
+    color: #fff;
+    padding: 20px 10px;
+    border-radius: 5px
+}
+
+.emergencyLocksmithService__title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: clamp(22px,4vw,32px)
+}
+
+.emergencyLocksmithService__txt {
+    line-height: 20px
+}
+
+.forms {
+    position: fixed;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+    z-index: 999
+}
+
+.forms__box {
+    margin: auto;
+    background-color: #3d4f45;
+    width: 80%;
+    padding: 10px 30px;
+    border-radius: 10px
+}
+
+.forms__title {
+    font-size: clamp(19px,5vw,40px);
+    color: #fff;
+    font-weight: 700;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+.forms__button {
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 19px;
+    color: #fff;
+    background-color: #ff4500;
+    padding: 17px 40px 17px 60px;
+    border-radius: 26px;
+    -webkit-box-shadow: 0 15px 40px 0 rgba(48,159,94,.3);
+    box-shadow: 0 15px 40px 0 rgba(48,159,94,.3);
+    -webkit-transition: all .15s ease-out;
+    transition: all .15s ease-out;
+    font-size: 16px;
+    border-radius: 15px
+}
+
+.forms__button:hover {
+    color: #fff;
+    background-color: #292929
+}
+
+.forms__button span {
+    position: relative
+}
+
+.forms__button span::before {
+    content: "";
+    position: absolute;
+    background: url(../icons/telephone-fill.svg);
+    width: 16px;
+    height: 16px;
+    left: -25px;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.closeForm {
+    font-weight: 700;
+    background: inherit;
+    border: 0;
+    font-size: 27px;
+    color: red
+}
+
+.btnFixed {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 10px
+}
+
+.btnFixed__btn {
+    background-color: var(--mainColor);
+    padding: 10px 10px 10px 40px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    -webkit-transition: .3s;
+    transition: .3s;
+    border-radius: 5px;
+    background-color: var(--mainColor);
+    width: 100%;
+    text-align: center;
+    padding: 16px 15px;
+    border-radius: 0
+}
+
+.btnFixed__btn span {
+    position: relative
+}
+
+.btnFixed__btn span::before {
+    content: "";
+    position: absolute;
+    background-image: url(../icons/telephone-fill.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: -30px;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
+.btnFixed__btn:hover {
+    color: #f6f3f0
+}
+
+.btnFixed__btn::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    font-size: 12px
+}
+
+.btnFixedD {
+    position: fixed;
+    bottom: 20px;
+    right: 10px
+}
+
+.btnFixedD__btn {
+    background-color: var(--mainColor);
+    padding: 10px;
+    border-radius: 50px;
+    width: 38px;
+    height: 38px
+}
+
+.btnFixedD__img {
+    width: 100%
+}
+
+.loadTheFormFixed {
+    position: fixed;
+    bottom: 70px;
+    right: 10px
+}
+
+.loadTheFormFixed__btn {
+    background-color: var(--mainColor);
+    padding: 10px;
+    border-radius: 50px;
+    width: 38px;
+    height: 38px;
+    border: 0
+}
+
+.loadTheFormFixed__img {
+    width: 100%
+}
+
+footer {
+    background-color: var(--mainColor);
+    color: #fff;
+    font-weight: 700;
+    padding: 13px 0;
+    margin-top: 30px
+}
+
+.styleSitemap {
+    color: #fff
+}
+
+@media (max-width: 820px) {
+    .price__wrapper {
+        -ms-grid-columns:(1fr)[2];
+        grid-template-columns: repeat(2,1fr);
+        gap: 20px
+    }
+}
+
+@media (max-width: 767px) {
+    .aufsperrdienst__box,.callCenter__box,.defaultPages2__box,.defaultPages__wrp,.header__box,.keyEmergencyService__wrp,.keyService__box,.montage__box,.price__wrapper {
+        -ms-grid-columns:1fr;
+        grid-template-columns: 1fr
+    }
+
+    .frontDoorLockBroken__box {
+        -ms-grid-columns: 1fr;
+        grid-template-columns: 1fr;
+        gap: 30px
+    }
+
+    .header__btnTelWrp {
+        text-align: center
+    }
+
+    .clock__box,.locksmithService__box,.locksmith__box,.multiPoint__box {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: reverse;
+        -ms-flex-direction: column-reverse;
+        flex-direction: column-reverse
+    }
+
+    .paymentMethod__inner {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        gap: 50px;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center
+    }
+
+    .paymentMethod__img {
+        width: 100%;
+        height: 100%;
+        max-width: 200px
+    }
+
+    .keyEmergencyService__img {
+        height: 300px
+    }
+}
+
+@media (max-width: 500px) {
+    .btnFixedD {
+        display:none
+    }
+
+    .btnFixed {
+        display: block
+    }
+
+    footer {
+        margin-bottom: 60px
+    }
+}

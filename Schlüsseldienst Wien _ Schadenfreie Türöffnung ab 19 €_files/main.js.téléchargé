@@ -1,0 +1,3496 @@
+window.addEventListener('DOMContentLoaded', function () {
+    'use strict';/* JS сработает когда DOM дерево подгрузится РЕКОМЕНДУЕТСЯ*/
+
+    // Функция со спиннером
+    function spinner() {
+        const spinner = document.getElementById("spinner");
+        if(spinner){
+            spinner.style.display = "block"
+            setTimeout(function () {
+                // Убирает спиннер
+                spinner.style.display = "none";
+            },2000)
+        }
+    }
+
+    //Спиннер на странице редактирования
+    spinner()
+
+
+    //Меняем текст
+    setTimeout(function() {
+        !(function() {
+            // Получаем элемент, который мы хотим сделать редактируемым
+            const edit = document.querySelector(".editable"),
+                  // Проверяем, загружена ли библиотека MediumEditor
+                  mediumEditorScript = document.querySelector('script[src="/static/assets/MediumEditor/js/medium-editor.min.js"]');
+
+            // Если элемент для редактирования и библиотека MediumEditor найдены, начинаем инициализацию редактора
+            if (edit && mediumEditorScript) {
+                // Функция для замены тегов <b> на <strong> внутри заданного элемента
+                function replaceBWithStrong(element) {
+                    // Получаем все элементы <b> внутри заданного элемента
+                    const boldElements = element.querySelectorAll('b');
+
+                    // Для каждого элемента <b>
+                    boldElements.forEach(b => {
+                        // Создаем новый элемент <strong>
+                        const strong = document.createElement('strong');
+                        // Перемещаем все дочерние элементы из <b> в <strong>
+                        while (b.firstChild) {
+                            strong.appendChild(b.firstChild);
+                        }
+                        // Заменяем старый элемент <b> на новый <strong>
+                        b.parentNode.replaceChild(strong, b);
+                    });
+                }
+
+                // Инициализация MediumEditor с конфигурацией
+                const editor = new MediumEditor('.editable', {
+                    toolbar: {
+                        /* Это параметры по умолчанию для панели инструментов.
+                           Если ничего не передается, это то, что используется */
+                        allowMultiParagraphSelection: true,
+                        buttons: [
+                            {
+                                name: 'bold', // имя тега
+                                action: 'bold',//аргумент
+                                aria: 'Сделать текст жирным alt+B', //подсказка
+                                tagNames: ['strong'],  // Используем tagNames вместо tagName
+                                contentDefault: '<strong>Strong</strong>', // то что будет отображаться на кнопке
+                            },
+                            {
+                                name: 'anchor', // имя тега
+                                aria: 'Добавить ссылку', //подсказка
+                                customClassOption: 'customClassOption',// имя класса
+                                customClassOptionText: 'Добавить класс', // текст, который будет написан на флажке
+                                linkValidation: true,// Преобразует недопустимые символы URL-адреса (например, пробелы) в допустимые символы
+                                placeholderText: 'Вставьте или введите ссылку',//текст, который будет отображаться в качестве заполнителя ввода привязки
+                                targetCheckbox: true,// включает/выключает отображение флажка «Открыть в новом окне»
+                                targetCheckboxText: 'Открыть в новом окне'//текст, который будет отображаться в флажке
+                            },
+                            {
+                                name: 'html',
+                                aria: 'Делает веденный текст например <section></section> в html теги', //подсказка
+                            },
+                            // {
+                            //     name: 'image',
+                            // }
+                        ],
+
+                        diffLeft: 0,
+                        diffTop: -10,
+                        firstButtonClass: 'medium-editor-button-first',
+                        lastButtonClass: 'medium-editor-button-last',
+                        relativeContainer: null,
+                        standardizeSelectionStart: false,
+                    },
+                    keyboardCommands: {
+                        /* Этот пример включает параметры по умолчанию для клавиатурных команд:
+                           если ничего не передано, это то, что он использовал */
+                        commands: [
+                            {
+                                command: 'bold',
+                                key: 'B',
+                                meta: false,
+                                shift: false,
+                                alt: true
+                            }
+                        ],
+                    },
+                    autoLink: true // при вводе URL или адреса электронной почты в редактируемом поле, MediumEditor автоматически преобразует их в гиперссылки
+                });
+
+                // Подписываемся на событие изменения в редакторе
+                // Обработчик для замены <b> на <strong> и вставки <br> при нажатии Enter
+                editor.subscribe('editableInput', function(event, editable) {
+                    // Замена <b> на <strong>
+                    replaceBWithStrong(editable);
+                });
+
+                // Обработчик для отслеживания нажатия клавиши Enter
+                editor.subscribe('editableKeydown', function(event) {
+                    if (event.keyCode === 13) { // 13 - код клавиши Enter
+                        // Предотвратить стандартное поведение (создание нового абзаца)
+                        event.preventDefault();
+
+                        // Создать и вставить элемент <br>
+                        var selection = window.getSelection(),
+                            range = selection.getRangeAt(0),
+                            br = document.createElement('br');
+
+                        range.deleteContents();
+                        range.insertNode(br);
+
+                        // Переместить курсор за вставленный элемент <br>
+                        range.setStartAfter(br);
+                        range.setEndAfter(br);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                });
+
+            }
+
+            function getCleanHTML() {
+                let path = window.location.pathname,
+                    parts = path.split('/'),
+                    desiredPart = parts[2];
+
+                // Меняем язык для at и be
+                if(desiredPart == "at"){
+                    desiredPart = "de"
+                }else if(desiredPart == "be"){
+                    desiredPart = "nl"
+                }
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = document.body.innerHTML;
+
+                //Получаем что нужно удалить
+                const editableElements = tempDiv.querySelectorAll('.medium-editor-element'),
+                    garbage = tempDiv.querySelector("#medium-editor-toolbar-1"),
+                    garbage2 = tempDiv.querySelector("#medium-editor-anchor-preview-1"),
+                    saveButton = tempDiv.querySelector("#saveButton"),
+                    form = tempDiv.querySelector("#selection-form"),
+                    formContextMenu = tempDiv.querySelector("#custom-menu"),
+                    editorTitleAndDescriptionWrapper = tempDiv.querySelector('.editorTitleAndDescriptionWrapper'),
+                    mediumEditorScript = tempDiv.querySelector('script[src="/static/assets/MediumEditor/js/medium-editor.min.js"]'),
+                    mediumEditorStyle = tempDiv.querySelector('link[href="/static/assets/MediumEditor/css/medium-editor.min.css"]'),
+                    mediumEditorStyleDefault = tempDiv.querySelector('link[href="/static/assets/MediumEditor/css/default.min.css"]'),
+                    cloudflareinsights = tempDiv.querySelector('script[src="https://static.cloudflareinsights.com/beacon.min.js/v84a3a4012de94ce1a686ba8c167c359c1696973893317"]'),
+                    mainCss = tempDiv.querySelector('link[href="/static/assets/css/main.css"]'),
+                    spinner = tempDiv.querySelector('#spinner'),
+                    wrpInputImg = tempDiv.querySelectorAll('.wrpInputImg'),
+                    mainColorWrp = tempDiv.querySelector('.mainColorWrp'),
+
+                    blockWithPagesEditingMode = tempDiv.querySelector('.blockWithPagesEditingMode'),
+                    actionSelectEditCopyMove = tempDiv.querySelector('.actionSelectEditCopyMove');
+
+
+
+                //Если существует удаляем
+                if (form) form.remove();
+                if (formContextMenu) formContextMenu.remove();
+                if (editorTitleAndDescriptionWrapper) editorTitleAndDescriptionWrapper.remove()
+                if (saveButton) saveButton.remove();
+                if (mediumEditorScript) mediumEditorScript.remove();
+                if (mainCss) mainCss.remove();
+                if (spinner) spinner.remove();
+                if (mainColorWrp) mainColorWrp.remove();
+                if (mediumEditorStyle) mediumEditorStyle.remove();
+                if (mediumEditorStyleDefault) mediumEditorStyleDefault.remove();
+                if (blockWithPagesEditingMode) blockWithPagesEditingMode.remove();
+                if (actionSelectEditCopyMove) actionSelectEditCopyMove.remove();
+                if (cloudflareinsights) cloudflareinsights.remove();
+
+                if (wrpInputImg) {
+                    wrpInputImg.forEach(elem => {
+                        elem.remove()
+                    })
+                }
+
+
+                //Пробегаемся по массиву и удаляем
+                editableElements.forEach(element => {
+                    element.removeAttribute('contenteditable');
+                    element.removeAttribute('spellcheck');
+                    element.removeAttribute('data-medium-editor-element');
+                    element.removeAttribute('role');
+                    element.removeAttribute('aria-multiline');
+                    element.removeAttribute('data-medium-editor-editor-index');
+                    element.removeAttribute('medium-editor-index');
+                    element.removeAttribute('data-placeholder');
+                    element.classList.remove('medium-editor-element');
+                });
+
+                // Тоже удаляем если существуют
+                if (garbage) {
+                    garbage.remove();
+                    garbage2.remove();
+                }
+
+                // Удаление всех инпутов из временного div, кроме инпутов внутри формы с ID 'jq_form'
+                const inputs = tempDiv.querySelectorAll('input:not(#jq_form input)');
+                inputs.forEach(input => {
+                    input.remove();
+                });
+
+                const headContent = document.head.outerHTML;
+                return `<!DOCTYPE html>\n<html lang="${desiredPart}" prefix="og: https://ogp.me/ns#">\n` + headContent + '\n<body>\n' + tempDiv.innerHTML.trim() + '</body></html>';
+            }
+
+            const saveButton = document.getElementById("saveButton");
+
+            if (saveButton) {
+                saveButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const sectionForms = document.querySelector('.forms'); //Форма обратной связи
+                    sectionForms.innerHTML = ''
+
+
+                    // Получаем текущий url
+                    var url = window.location.href;  // Получаем текущий URL
+                    var parts = url.split("/")
+                    var pageName = parts[parts.length - 1]; // Получаем последнюю часть URL
+                    var index = parts.indexOf('sites');
+                    if (index !== -1 && parts.length > index + 2) {
+                        var region = parts[index + 1];
+                        var service = parts[index + 2]
+                    }
+
+                    // Получить тексты из нужных элементов
+                    const headerTitleText = document.querySelector('.header__title').textContent,
+                          metaDescText = document.querySelector('.metaDesc').textContent,
+                          phoneNumber = document.querySelector('.addPhoneNumber > span').textContent;
+
+
+                    //Спиннер для кнопки Сохранить
+                    const spinner = document.getElementById("spinner");
+                    if(spinner){
+                        spinner.style.display = "block"
+                    }
+
+                    const html = getCleanHTML();
+
+                    setTimeout(() => {
+                        fetch('/editsite', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'text/html',
+                                'Page-Name': pageName // передаем pageName как заголовок
+                            },
+                            body: html
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    // Отправить эти тексты на сервер, чтобы поменять title и description
+                                    fetch('/changeTitleAndDescriptionIndexhtml', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            headerTitle: modul.editorTitleAndDescription.getsTheValueFromTheTitleInput(),
+                                            metaDescription: modul.editorTitleAndDescription.getsTheValueFromTheDescriptionInput(),
+                                            region: region,
+                                            service: service,
+                                            pageName: pageName
+                                        })
+                                    }).then(response => {
+                                        if(response.ok){
+                                            // Отправить на сервер регион сайта, название сайта и номер телефона
+                                            fetch('/addPhoneNumberPages', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify({
+                                                    region: region,
+                                                    service: service,
+                                                    phoneNumber: phoneNumber,
+                                                })
+                                            }).then(response => {
+                                                if(response.ok){
+                                                    // Отправляет запрос на сервер для добавления нового блока на все страницы
+                                                    copyMovements.sendsARequestToTheServerToAddANewBlockToAllPages()
+                                                }
+                                            })
+                                        }
+                                    })
+
+                                    // window.location.reload();
+                                } else {
+                                    // Обработка ошибок
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Ошибка при отправке данных:", error);
+                            });
+                    }, 2000); // задержка в 2 секунды
+                });
+            }
+             window.module = {
+                 getCleanHTML,
+             }
+        })();
+
+    }, 2000); // 2000 миллисекунд равны 2 секундам
+
+
+
+
+//Функция для очистки содержимого формы и ответа от сервера
+    !(function() {
+
+        // Функция для очистки содержимого формы и ответа от сервера
+        function clearFormAndResponse() {
+            document.getElementById('selected-text').value = "";  // Очистка поля с выделенным текстом
+            document.getElementById('response').innerHTML = "";   // Очистка блока с ответом сервера
+        }
+
+        // Обработчик события нажатия на кнопку "Закрыть"
+        const closeButton = document.getElementById('close-button');
+        if (closeButton) {
+            closeButton.onclick = function() {
+                var form = document.getElementById('selection-form');
+                form.style.display = 'none';  // Скрытие формы
+                clearFormAndResponse();   // Очистка формы и ответа сервера
+            };
+        }
+
+        function timeout(ms) {
+            return new Promise((_, reject) => {
+                setTimeout(() => {
+                    reject(new Error(`Таймаут запроса после ${ms} миллисекунд`));
+                }, ms);
+            });
+        }
+
+        //Заменяем отмеченный текс на ответ от GPT
+        function replaceSelectedTextWithCheckbox(replacementText) {
+            // Найдем отмеченный чекбокс
+            const checkedCheckbox = document.querySelector('input[type="checkbox"]:checked');
+
+            if (checkedCheckbox) {
+                // Если чекбокс найден, найдем соответствующий ему editable
+                const correspondingEditable = checkedCheckbox.closest('.editable');
+
+                if (correspondingEditable) {
+                    let node = checkedCheckbox.nextSibling;
+
+                    // Удаляем все узлы после чекбокса, пока не дойдем до конца родительского элемента
+                    while (node) {
+                        const nextNode = node.nextSibling; // Запомним следующий узел, так как текущий узел будет удален
+                        correspondingEditable.removeChild(node);
+                        node = nextNode;
+                    }
+
+                    // Вставляем заменяемый текст сразу после чекбокса как HTML
+                    checkedCheckbox.insertAdjacentHTML('afterend', replacementText);
+                }
+            }
+        }
+
+
+        // Обработчик события нажатия на кнопку "Отправить"
+        const submitButton = document.getElementById('submit-button');
+        if (submitButton) {
+            submitButton.onclick = async function() {
+                // Показать спиннер перед отправкой запроса
+                document.getElementById("spinner").style.display = "block";
+
+                // Получение значений из полей формы
+                const selectedText = document.getElementById('selected-text').value,
+                      systemMessage = document.getElementById('systemMessage').value,
+                      howManyOptionsValue = document.getElementById('howManyOptions').value,
+                      charactersValue = document.getElementById('characters').value;
+
+                const formData = new URLSearchParams();
+                formData.append('selectedText', selectedText);
+                formData.append('systemMessage', systemMessage);
+                formData.append('howManyOptions', howManyOptionsValue);
+                formData.append('characters', charactersValue);
+
+                try {
+                    const response = await Promise.race([
+                        fetch(window.location.origin + "/apigpt", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: formData
+                        }),
+                        timeout(120000) // 5 мин = 3000000 миллисекунд
+                    ]);
+
+                    if (response.ok) {
+                        const responseBody = await response.text();
+                        document.getElementById('response').innerHTML = responseBody;
+
+                        const results = document.querySelectorAll('.resultGPT');
+                        results.forEach(function(result) {
+                            // Обработчик нажатия на каждый результат
+                            result.addEventListener('click', function(event) {
+                                let responseText;
+
+                                if (event.target.classList.contains('responsGPT')) {
+                                    const strongElement = event.target.querySelector('strong');
+                                    if (strongElement) {
+                                        responseText = strongElement.outerHTML; // текст внутри <strong> со всеми вложенными HTML-тегами
+                                    } else {
+                                        responseText = event.target.innerText; // просто текст, если нет <strong>
+                                    }
+                                } else if (event.target.tagName === 'STRONG') {
+                                    responseText = event.target.outerHTML; // текст внутри <strong> со всеми вложенными HTML-тегами
+                                }
+
+                                if (responseText) {
+                                    replaceSelectedTextWithCheckbox(responseText);
+                                    const form = document.getElementById('selection-form');
+                                    form.style.display = 'none';
+                                    clearFormAndResponse();
+                                }
+                            });
+                        });
+                    } else {
+                        // Добавьте обработку ошибок сети или сервера здесь
+                        throw new Error('Сетевой ответ был не в порядке');
+                    }
+                } catch (error) {
+                    if (error.message === "Таймаут запроса") {
+                        console.error("Запрос превысил установленное время ожидания");
+                    } else if (error.name === "TypeError" && error.message.startsWith("Failed to fetch")) {
+                        console.error("Произошла ошибка сети. Проверьте ваше соединение с интернетом и доступность сервера.");
+                    } else {
+                        console.error("Произошла ошибка:", error.message);
+                    }
+                } finally {
+                    // Скрыть спиннер после завершения запроса
+                    document.getElementById("spinner").style.display = "none";
+                }
+            };
+        }
+    })();
+
+})
+
+let stylesApplied = false; // Флаг для отслеживания применения стилей
+
+// Функция для центрирования формы на экране
+function centerForm() {
+    if (stylesApplied) return; // Если стили уже были применены, выходим из функции
+
+    const form = document.getElementById('selection-form');
+    form.style.position = 'fixed';
+    form.style.left = 'calc(50% - 210px)';
+    form.style.top = '0';
+    form.style.marginLeft = `-${form.offsetWidth / 2}px`;
+    form.style.marginTop = `-${form.offsetHeight / 2}px`;
+    form.style.zIndex = '1000';
+
+    stylesApplied = true; // Устанавливаем флаг в true после применения стилей
+}
+
+//Добавляем и удаляем возможность редактирования страницы
+!(function() {
+// Функция обновляет содержимое textarea в зависимости от выбранного чекбокса
+    function updateTextareaContent(checkbox) {
+        let node = checkbox.nextSibling;
+        let associatedText = '';
+
+        while (node) {
+            if (node.nodeType === 3) { // Если узел является текстовым узлом
+                associatedText += node.nodeValue;
+            } else if (node.nodeType === 1) { // Если узел является элементом
+                associatedText += node.textContent; // Добавляем содержимое элемента к тексту
+            }
+            node = node.nextSibling;
+        }
+
+        const selectedText = document.getElementById('selected-text');
+        const wrappedContent = '[' + associatedText.trim() + ']'; // Оборачиваем найденный текст в []
+
+        // Если чекбокс выбран, добавляем текст в textarea
+        if (checkbox.checked) {
+            selectedText.value += wrappedContent + '\n\n';
+        } else {
+            // В противном случае удаляем его
+            const pattern = new RegExp(wrappedContent.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '\n\n', 'g');
+            selectedText.value = selectedText.value.replace(pattern, '');
+        }
+
+        // Обновляем количество символов и центрируем форму
+        updateCharacterCount();
+        centerForm();
+    }
+
+    // Функция для обработки нажатия на чекбокс взаимоисключение
+    function checkOnlyOne(event) {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const selectedText = document.getElementById('selected-text');
+
+        checkboxes.forEach(function(box) {
+            if (box !== event.target && box.checked) {
+                let associatedText = '';
+                let node = box.nextSibling;
+
+                while (node) {
+                    if (node.nodeType === 3) {
+                        associatedText += node.nodeValue;
+                    } else if (node.nodeType === 1) {
+                        associatedText += node.textContent;
+                    }
+                    node = node.nextSibling;
+                }
+
+                const wrappedContent = '[' + associatedText.trim() + ']';
+
+                // Удаляем текст со снятого чекбокса
+                const pattern = new RegExp(wrappedContent.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '\n\n', 'g');
+                selectedText.value = selectedText.value.replace(pattern, '');
+
+                box.checked = false;
+            }
+        });
+        // Обновляем количество символов и центрируем форму
+        updateCharacterCount();
+        updateSystemMessage(updateCharacterCount())
+    }
+
+    // Функция обновляет количество символов в textarea
+    function updateCharacterCount() {
+        const selectedText = document.getElementById('selected-text');
+        const charactersInput = document.getElementById('characters');
+        return charactersInput.value = selectedText.value.length;
+    }
+
+    // Обновляет длину символов в Системном сообщении для GPT
+    function updateSystemMessage(Characters) {
+        let textarea = document.getElementById('systemMessage');
+
+        if (textarea) {
+            let currentContent = textarea.value;
+
+            // Формирование новой строки с обновленной длиной символов
+            let updatedLengthString = `${Characters}-${Characters + 10}`;
+
+            // Замена старой строки с длиной символов на новую
+            let newContent = currentContent.replace(/\d+-\d+/, updatedLengthString);
+
+            textarea.value = newContent;
+        }
+    }
+
+    // Функция добавляет форму на страницу
+    function addForm(region) {
+        const languageMapping = {
+            "at": "НЕМЕЦКОМ",
+            "be": "НИДЕРЛАНДСКОМ",
+            "cz": "ЧЕШКОМ",
+            "fr": "ФРАНЦУЗСКОМ",
+            "gb": "АНГЛИЙСКОМ",
+            "hu": "ВЕНГЕРСКОМ",
+            "no": "НОРВЕЖСКОМ",
+            "pl": "ПОЛЬСКОМ",
+            "ru": "РУССКОМ"
+        };
+        let siteLanguage = languageMapping[region] || "Неизвестный язык";
+
+        const formHTML = `<button id="saveButton">Сохранить</button>
+            <form id="selection-form" class="ui-widget-content draggable" style="display: none; ">
+            <fieldset id="allTopTextArea">
+                <fieldset id="fildsetSelectedText">
+                    <label id="selectedTextLabel" for="selectedText"><span class="redStar">*</span> Строка запроса:</label>
+                    <textarea id="selected-text" name="selectedText"></textarea>
+            </fieldset>
+            </fieldset>
+            <fieldset id="fildsetSystemMessage">
+                <label id="systemMessageLabel" for="selectedCity"><span class="redStar">*</span> Системное сообщение для GPT:</label>
+                <textarea id="systemMessage" name="systemMessage" placeholder="Введите системное сообщение здесь...">
+Основные требования:
+- длина не более 0-10 символов
+- Тексты для адаптации исключительно на ${siteLanguage} языке.
+- Для выбранной строки создайте уникальную и смысловую адаптацию.
+- Длина текста не должна превышать длину самой строки.
+- Стремитесь сделать адаптацию уникальной, сохраняя при этом первоначальный смысл исходного текста.
+- Все тексты должны быть только на ${siteLanguage} языке.
+
+Пожалуйста, строго следуйте этим требованиям.
+                </textarea>
+            </fieldset>
+
+                
+                
+                <fieldset id="fieldsetButtonInput">
+                    <fieldset id="fieldsetInput">
+                        <fieldset id="fieldsetInputOptions">
+                            <label for="howManyOptions">Кол-во вар:</label>
+                            <input id="howManyOptions" type="text" name="howManyOptions" value="1" required="">
+                        </fieldset>
+                        <fieldset id="fieldsetInputCharacters">
+                            <label for="characters">Кол-во симв:</label>
+                            <input id="characters" type="text" name="characters" required="">
+                        </fieldset>
+                    </fieldset>
+                    <fieldset id="fieldsetButton">
+                        <input type="button" id="submit-button" value="Спросить GPT">
+                            <button id="close-button" type="button">Закрыть</button>
+                    </fieldset>
+                </fieldset>
+                <div id="response"></div>
+            </form>`; // Здесь ваш HTML код для формы
+
+        const spinner = `
+            <div id="spinner" style="display:none;">
+                <div class="loader">
+                    <div class="inner one"></div>
+                    <div class="inner two"></div>
+                    <div class="inner three"></div>
+                </div>
+            </div>`;// Здесь HTML код спиннера
+
+        const addBlockViewCounterPages = `
+             <div class="blockWithPagesEditingMode">
+                <div class="headeREditingMode">
+                    Page Editor <span class="total_pages"><!-- Количество страниц --></span><div id="hideMenuEditingMode">–</div>
+                </div>
+                <div>
+                    <div class="pagesListEditingMode">
+                        <div class="pagesListItemEditingMode"><!-- Список страниц --></div>
+                    </div>
+                     <!-- Поиск страниц -->
+                    <div class="searchPagesWrapper">
+                        <input class="searchPages" type="search" name="searchPages" placeholder="Поиск страниц...">
+                    </div>
+                </div>
+            </div>
+        `
+
+        const actionSelectBlock = `
+            <select class="actionSelectEditCopyMove" name="actionSelectEditCopyMove">
+                <option value="edit">Редактор</option>
+                <option value="copy">Копировать</option>
+                <option value="move">Переместить</option>
+                <option value="delete">Удалить</option>
+            </select>
+        `
+
+        const editorTitleAndDescription = `
+            <div class='editorTitleAndDescriptionWrapper'>
+                <fieldset class='titleEditorInner'>
+                    <label class='titleEditorLabel' for="titleEditorId">Title (45-80) <span>0</span></label>
+                    <input class='titleEditor' id='titleEditorId' name='titleEditor'>
+                </fieldset>
+                <fieldset class='descriptionEditorInner'>
+                    <label class='descriptionEditorLabel' for="descriptionEditorId">Description (160-290) <span>0</span></label>
+                    <textarea class='descriptionEditor' id="descriptionEditorId" name="descriptionEditor"></textarea>
+                </fieldset>
+            </div>
+        `
+
+        const body = document.body;
+        body.insertAdjacentHTML('afterbegin', formHTML);
+        // body.insertAdjacentHTML('afterbegin', formContexMenu);
+        body.insertAdjacentHTML('afterbegin', spinner);
+        // body.insertAdjacentHTML('afterbegin', dialog);
+        body.insertAdjacentHTML('afterbegin', addBlockViewCounterPages);
+        body.insertAdjacentHTML('afterbegin', actionSelectBlock);
+        body.insertAdjacentHTML('afterbegin', editorTitleAndDescription);
+    }
+
+// Получаем текущий url
+    var url = window.location.href;  // Получаем текущий URL
+    var parts = url.split("/")
+    var index = parts.indexOf('sites');
+    var baseURL = "";
+
+    if (index !== -1 && parts.length > index + 2) {
+        var region = parts[index + 1];
+        var service = parts[index + 2];
+
+        if (parts[index + 3] === "pages" && parts.length > index + 3) {
+            // Если текущий URL уже содержит /pages/, то исключаем его
+            baseURL = parts.slice(0, index + 3).join("/") + "/";
+        } else {
+            baseURL = parts.slice(0, index + 3).join("/") + "/";
+        }
+    }
+
+// Функция showPagesInPageBlockPlagin вызывается для отправки запроса на сервер и получения данных о страницах(количество и страницы)
+    function showPagesInPageBlockPlagin() {
+        if (region && service) {
+            // Создаем объект с данными, которые хотим отправить
+            var dataToSend = {
+                region: region,
+                service: service
+            };
+
+            // Выполняем POST-запрос к серверу с JSON в теле
+            fetch('/showpagesinpageblockplagin', {
+                method: 'POST', // Метод запроса
+                headers: {
+                    'Content-Type': 'application/json' // Тип контента - JSON
+                },
+                body: JSON.stringify(dataToSend) // Преобразовываем объект в строку JSON
+            })
+                .then(response => response.json()) // Парсим ответ сервера из JSON
+                .then(data => {
+                    // Проверяем, есть ли поле 'error' в ответе
+                    if (data.error) {
+                        // Обрабатываем ошибку, если она есть
+                        // console.error('Страницы не найдены:', data.message);
+                    } else {
+                        // Если ошибки нет, обрабатываем данные
+                        const fragment = new DocumentFragment();// Создаем вертуальный Dom
+                        const pages_list_item = document.querySelector('.pagesListItemEditingMode');
+                        const total_pages = document.querySelector('.total_pages');
+                        const blockWithPagesEditingMode = document.querySelector('.blockWithPagesEditingMode');
+
+                        if(data.total_files > 0) {
+                            blockWithPagesEditingMode.style.display = 'block';
+                        }
+                        total_pages.textContent = data.total_files;
+
+                        data.files_with_html.forEach((link, i) => {
+
+                            const div = document.createElement('div')
+                            div.className = 'pageWrapper';
+
+                            const a = document.createElement('a')
+                            a.className = 'linkPageEditorMode flush__edit';
+                            a.href = `${baseURL}pages/${link}`
+                            a.textContent = data.files_without_html[i].toUpperCase()
+                            div.appendChild(a)
+                            fragment.appendChild(div)
+
+                        });
+                        pages_list_item.innerHTML = '';
+                        pages_list_item.appendChild(fragment);
+                    }
+                })
+                .catch(() => {
+                    // Ловим и выводим в консоль любые ошибки
+                    // console.error('Ошибка:', error);
+                });
+        } else {
+            // Если переменные region или service не определены
+            console.log(region, service + " не найдены");
+        }
+    }
+
+//Показываем карту сайта если на сайте есть внутренне страницы
+    function showSiteMape() {
+        if (region && service) {
+            // Создаем объект с данными, которые хотим отправить
+            var dataToSend = {
+                region: region,
+                service: service
+            };
+
+            // Выполняем POST-запрос к серверу с JSON в теле
+            fetch('/showpagesinpageblockplagin', {
+                method: 'POST', // Метод запроса
+                headers: {
+                    'Content-Type': 'application/json' // Тип контента - JSON
+                },
+                body: JSON.stringify(dataToSend) // Преобразовываем объект в строку JSON
+            })
+                .then(response => response.json()) // Парсим ответ сервера из JSON
+                .then(() => {
+                    // // Проверяем, есть ли поле 'error' в ответе
+                    // if (data.error) {
+                    //     // Обрабатываем ошибку, если она есть
+                    // } else {
+                    //     // Если ошибки нет, обрабатываем данные
+                    //     const styleSitemap = document.querySelector('.styleSitemap');
+                    //
+                    //     if(data.total_files > 0) {
+                    //         styleSitemap.style.display = 'inline-block';
+                    //     }
+                    // }
+                })
+                .catch(() => {
+                    // Ловим и выводим в консоль любые ошибки
+                    // console.error('Ошибка:', error);
+                });
+        } else {
+            // Если переменные region или service не определены
+            // console.log(region, service + " не найдены");
+        }
+    }
+    showSiteMape()
+
+    // Функция добавляет чекбоксы к редактируемым элементам
+    function addCheckboxesToEditableElements() {
+        const editableElements = document.querySelectorAll('.editable');
+        editableElements.forEach(function(element, index) {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.style.width = '15px';
+            checkbox.style.height = '15px';
+            checkbox.style.top = '0';
+            checkbox.style.left = '-30px';
+            checkbox.name = 'checkbox_' + index; // Установите уникальное имя для каждого чекбокса
+            checkbox.value = index; // Установите порядковый номер как значение
+
+            if (element.getBoundingClientRect().left < 30) {
+                checkbox.style.left = '0';
+                checkbox.style.top = '-30px';
+            }
+            // Вставляем чекбокс внутрь элемента с классом editable
+            element.insertAdjacentElement('afterbegin', checkbox);
+        });
+    }
+
+
+    // Функция показывает форму на экране
+    function showForm() {
+        const form = document.getElementById('selection-form');
+        form.style.display = 'block';
+    }
+
+    // Функция добавляет слушателей событий к чекбоксам
+    function attachCheckboxHandlers() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateTextareaContent(checkbox);
+                showForm();
+            });
+        });
+    }
+
+    // Функция добавляет слушатель событий к textarea
+    function attachTextareaHandlers() {
+        const selectedText = document.getElementById('selected-text');
+        selectedText.addEventListener('input', function() {
+            updateCharacterCount()
+            updateSystemMessage(updateCharacterCount())
+        } )
+
+    }
+
+
+
+    // Добавить номер телефона
+    function addPhoneNumberFunc(){
+        // Получаем элемент, за которым будем наблюдать, по классу '.addPhoneNumber'
+        const targetNode = document.querySelector('.addPhoneNumber');
+
+        // Настройки для MutationObserver. Определяют, какие типы изменений наблюдать
+        // - attributes: наблюдать за изменениями атрибутов элемента
+        // - childList: наблюдать за изменением потомков элемента
+        // - characterData: наблюдать за изменением текстовых данных элемента
+        // - subtree: наблюдать за всеми потомками элемента, а не только за прямыми потомками
+        // - attributeFilter: массив атрибутов, за которыми следует наблюдать. В данном случае - только за 'href'
+        const config = { attributes: true, childList: true, characterData: true, subtree: true, attributeFilter: ['href'] };
+
+        // Callback-функция для MutationObserver, которая вызывается при каждом обнаруженном изменении
+        const callback = function(mutationsList, observer) {
+            // Проходим по списку обнаруженных изменений
+            for(let mutation of mutationsList) {
+                // Обрабатываем изменения, связанные с добавлением/удалением дочерних элементов или изменением текстовых данных
+                if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                    let updatedSpanContent;
+
+                    // Проверяем, есть ли текст в targetNode, который находится не внутри элемента <span>
+                    if (!targetNode.querySelector('span') && targetNode.textContent.trim() !== "") {
+                        // Создаем новый элемент <span>
+                        const spanElement = document.createElement('span');
+                        spanElement.textContent = targetNode.textContent.trim();
+                        // Очищаем текущий текст в targetNode
+                        targetNode.textContent = '';
+                        // Добавляем новый элемент <span> в targetNode
+                        targetNode.appendChild(spanElement);
+                        updatedSpanContent = spanElement.textContent;
+
+                        // Перемещаем курсор ввода в конец нового элемента <span>
+                        const range = document.createRange();
+                        const sel = window.getSelection();
+                        range.setStart(spanElement, spanElement.childNodes.length);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    } else {
+                        // Если текст уже находится внутри элемента <span>, просто обновляем переменную updatedSpanContent
+                        updatedSpanContent = targetNode.querySelector('span').textContent;
+                    }
+
+                    // Получаем список всех ссылок с классом '.addPhoneNumber' на странице
+                    const allLinks = document.querySelectorAll('.addPhoneNumber');
+                    allLinks.forEach(link => {
+                        const spanElement = link.querySelector('span'),
+                            imgElement = link.querySelector('img');
+
+                        if (spanElement) {
+                            // Обновляем текст внутри <span>
+                            spanElement.textContent = updatedSpanContent;
+                        } else if (!imgElement) {
+                            // Если <span> и <img> отсутствуют, создаем новый <span> и добавляем его в ссылку
+                            const newSpanElement = document.createElement('span');
+                            newSpanElement.textContent = updatedSpanContent;
+                            link.appendChild(newSpanElement);
+                        }
+                        // Обновляем атрибут href ссылки, добавляя префикс 'tel:' к номеру телефона
+                        link.setAttribute('href', `tel:${updatedSpanContent}`);
+                    });
+
+                }
+            }
+        };
+
+        // Создаем новый экземпляр MutationObserver с переданным callback-ом
+        const observer = new MutationObserver(callback);
+
+        // Начинаем наблюдение за изменениями в targetNode с указанными настройками
+        observer.observe(targetNode, config);
+    }
+
+// Поиск страниц
+    function searchPages() {
+        // Получаем элемент поля ввода поиска по классу
+        const searchField = document.querySelector('.searchPages');
+        // Инициализируем переменную для хранения идентификатора таймера задержки
+        let timeout = null;
+
+        // Проверяем, существует ли поле ввода на странице
+        if (searchField) {
+            // Объявление переменной Получаем все элементы страниц для поиска по селектору
+            let allPages = ""
+
+            // Назначаем обработчик события на каждый ввод в поле поиска
+            searchField.oninput = function() {
+                // Очищаем предыдущий таймер задержки, если таковой был установлен
+                clearTimeout(timeout);
+
+                // Устанавливаем новый таймер задержки
+                timeout = setTimeout(() => {
+                    // Получаем значение из поля ввода, удаляем пробелы с обеих сторон и переводим в верхний регистр
+                    let val = this.value.trim().toUpperCase();
+
+                    // Проверяем, не пустое ли значение введено
+                    if (val !== '') {
+                        // Получаем все элементы страниц для поиска по селектору
+                        allPages = document.querySelectorAll('.pagesListEditingMode .pagesListItemEditingMode .pageWrapper a');
+                        // Инициализируем переменную для хранения первого найденного элемента
+                        let firstFound = null;
+
+                        // Перебираем все элементы страниц
+                        allPages.forEach(elem => {
+                            // Получаем текст элемента, приводим к верхнему регистру
+                            const text = elem.textContent.toUpperCase();
+
+                            // Проверяем, содержит ли текст искомое значение
+                            if (text.includes(val)) {
+                                // Если это первое найденное совпадение, сохраняем элемент
+                                if (!firstFound) firstFound = elem;
+                                // Выделяем найденное совпадение с помощью функции insertMark
+                                const index = text.indexOf(val);
+                                elem.innerHTML = insertMark(elem.textContent, index, val.length);
+                            } else {
+                                // Если совпадений нет, возвращаем исходный текст элемента
+                                elem.innerHTML = elem.textContent;
+                            }
+                        });
+
+                        // Если нашли хотя бы одно совпадение, прокручиваем страницу до первого найденного элемента
+                        if (firstFound) firstFound.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        // Если строка поиска пуста, сбрасываем выделение для всех элементов
+                        allPages.forEach(elem => {
+                            elem.innerHTML = elem.textContent;
+                        });
+                    }
+                }, 500); // Задаем задержку в 500 миллисекунд
+            };
+        }
+    }
+
+// Поиск Логов
+    function searchLogs() {
+        // Получаем элемент поля ввода поиска по классу
+        const searchField = document.querySelector('.searchLogs');
+        // Инициализируем переменную для хранения идентификатора таймера задержки
+        let timeout = null;
+        // Проверяем, существует ли поле ввода на странице
+        if (searchField) {
+            // Объявление переменной Получаем все элементы страниц для поиска по селектору
+            let allPages = ""
+            // Назначаем обработчик события на каждый ввод в поле поиска
+            searchField.oninput = function() {
+
+                // Очищаем предыдущий таймер задержки, если таковой был установлен
+                clearTimeout(timeout);
+                // Устанавливаем новый таймер задержки
+                timeout = setTimeout(() => {
+                    // Получаем значение из поля ввода, удаляем пробелы с обеих сторон и переводим в верхний регистр
+                    let val = this.value.trim().toUpperCase();
+                    // Проверяем, не пустое ли значение введено
+                    if (val !== '') {
+                        // Получаем все элементы страниц для поиска по селектору
+                        allPages = document.querySelectorAll('.lineLogs');
+                        // Инициализируем переменную для хранения первого найденного элемента
+                        let firstFound = null;
+                        // Перебираем все элементы страниц
+                        allPages.forEach(elem => {
+                            // Получаем текст элемента, приводим к верхнему регистру
+                            const text = elem.textContent.toUpperCase();
+
+                            // Проверяем, содержит ли текст искомое значение
+                            if (text.includes(val)) {
+                                // Если это первое найденное совпадение, сохраняем элемент
+                                if (!firstFound) firstFound = elem;
+                                // Выделяем найденное совпадение с помощью функции insertMark
+                                const index = text.indexOf(val);
+                                elem.innerHTML = insertMark(elem.textContent, index, val.length);
+                            } else {
+                                // Если совпадений нет, возвращаем исходный текст элемента
+                                elem.innerHTML = elem.textContent;
+                            }
+                        });
+
+                        // Если нашли хотя бы одно совпадение, прокручиваем страницу до первого найденного элемента
+                        if (firstFound) firstFound.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        // Если строка поиска пуста, сбрасываем выделение для всех элементов
+                        allPages.forEach(elem => {
+                            elem.innerHTML = elem.textContent;
+                        });
+                    }
+                }, 500); // Задаем задержку в 500 миллисекунд
+            };
+        }
+    }
+    searchLogs()
+
+// Поиск страниц
+//     function searchPages() {
+//         // Установка обработчика событий на ввод в поле поиска
+//         const searchPages = document.querySelector('.searchPages');
+//         if(searchPages){
+//             searchPages.oninput = function (){
+//                 // Получение введенного значения и выборка всех элементов ссылок в таблице
+//                 let val = this.value.trim().toUpperCase(),
+//                     allPages = document.querySelectorAll('.pagesListEditingMode .pagesListItemEditingMode .pageWrapper a'),
+//                     found = false; // Переменная для отслеживания наличия совпадений
+//
+//                 // Проверка, не пуст ли введенный запрос
+//                 if(val !== ''){
+//                     // Перебор всех элементов ссылок
+//                     allPages.forEach(function(elem) {
+//                         let row = elem.closest('.pageWrapper'); // Находим ближайший родительский элемент 'tr' для ссылки
+//                         // Проверка, соответствует ли текст ссылки запросу
+//                         if(elem.innerText.search(val) === -1){
+//                             row.classList.add('hide'); // Скрываем строку, если нет совпадения
+//                         }
+//                         else {
+//                             found = true; // Устанавливаем флаг в true, если найдено совпадение
+//                             row.classList.remove('hide'); // Показываем строку, если есть совпадение
+//                             let str = elem.innerText;
+//                             // Вызываем функцию для выделения найденного текста
+//                             elem.innerHTML = insertMark(str, elem.innerText.search(val), val.length);
+//                         }
+//                     });
+//                 }
+//                 else {
+//                     // Если запрос пуст, показываем все строки и сбрасываем изменения в тексте ссылок
+//                     allPages.forEach(function(elem) {
+//                         let row = elem.closest('.pageWrapper');
+//                         row.classList.remove('hide');
+//                         elem.innerHTML = elem.innerText;
+//                     });
+//                 }
+//             }
+//         }
+//     }
+
+// Вспомогательная функция для формы поиска страниц подсвечивает буквы
+    function insertMark(string,pos,len){
+        return string.slice(0,pos) + '<mark>' + string.slice(pos, pos + len) + '</mark>' + string.slice(pos + len);
+    }
+
+//Логи
+function logsColor(){
+        const lineLogs = document.querySelectorAll('.lineLogs');
+        if(lineLogs){
+            lineLogs.forEach(line => {
+                if(line.textContent.includes("ERRO")){
+                    line.classList.add("logError")
+                }
+            })
+        }
+}
+logsColor()
+
+// Класс для редактирования Title и Description
+    class EditorTitleAndDescription {
+        titleEditor; //  input Title
+        titleEditorLabelSpan; // количество символов в Title
+        descriptionEditor; // input Description
+        descriptionEditorLabelSpan; // количесвто символов в Description
+        title; // Получаем поле Title
+        description; // Получаем поле Description
+
+        constructor(titleEditorSection, titleEditorLabelSpanSection, descriptionEditorSection, descriptionEditorLabelSpanSection, titleSection, descriptionSection) {
+            this.titleEditor = titleEditorSection
+            this.titleEditorLabelSpan = titleEditorLabelSpanSection
+            this.descriptionEditor = descriptionEditorSection
+            this.descriptionEditorLabelSpan = descriptionEditorLabelSpanSection
+            this.title = titleSection
+            this.description = descriptionSection
+        }
+
+        initialize(){
+
+            this.titleEditor = document.querySelector(this.titleEditor)
+            this.titleEditorLabelSpan = document.querySelector(this.titleEditorLabelSpan)
+            this.descriptionEditor = document.querySelector(this.descriptionEditor)
+            this.descriptionEditorLabelSpan = document.querySelector(this.descriptionEditorLabelSpan)
+            this.title = document.querySelector(this.title)
+            this.description = document.querySelector(this.description)
+
+            // Проверка успешности выбора элементов
+            if (!this.titleEditor || !this.titleEditorLabelSpan || !this.descriptionEditor || !this.descriptionEditorLabelSpan || !this.title || !this.description) {
+                console.error("Ошибка инициализации: один или несколько элементов не найдены.");
+                return; // Прекратить выполнение, если не все элементы найдены
+            }
+
+            this.countingTheNumberOfCharactersInATitleAndDescription() // Подсчитывает количество символов в Title и Description
+            this.setsDefaultValueForTitleAndDescription() // Устанавливает значение по умолчанию для Title и Description
+            this.setsTheDefaultNumberOfCharacters() // Устанавливает количество символов по умолчанию
+
+        }
+
+        // Подсчитывает количество символов в Title и Description
+        countingTheNumberOfCharactersInATitleAndDescription(){
+
+            this.titleEditor.addEventListener('input', () => {
+                this.titleEditorLabelSpan.textContent = this.titleEditor.value.length;
+            })
+
+            this.descriptionEditor.addEventListener('input', () => {
+                this.descriptionEditorLabelSpan.textContent = this.descriptionEditor.value.replace(/\s/g, '').length;
+            })
+        }
+
+        // Устанавливает значение по умолчанию для Title и Description
+        setsDefaultValueForTitleAndDescription(){
+            this.titleEditor.value = this.title.textContent.trim();
+            this.descriptionEditor.value = this.description.content.trim()
+        }
+
+        // Устанавливает количество символов по умолчанию
+        setsTheDefaultNumberOfCharacters(){
+            this.titleEditorLabelSpan.textContent = this.titleEditor.value.length;
+            this.descriptionEditorLabelSpan.textContent = this.descriptionEditor.value.replace(/\s/g, '').length;
+        }
+
+        // Получает значение из инпута Title
+        getsTheValueFromTheTitleInput(){
+            return this.titleEditor.value
+        }
+
+        // Получает значение из инпута Description
+        getsTheValueFromTheDescriptionInput(){
+            return this.descriptionEditor.value
+        }
+
+
+    }
+    const editorTitleAndDescription = new EditorTitleAndDescription(
+        '.titleEditor', '.titleEditorLabel > span', 
+        '.descriptionEditor', '.descriptionEditorLabel > span',
+        'title', "meta[name='description']"
+        )
+
+    // Когда документ полностью загружен
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // Добавление обработчика клика на теле документа
+        document.body.addEventListener("click", function(event) {
+            if (event.target.classList.contains("flush__edit")) {
+                localStorage.setItem('addMediumEditor', 'true'); // Добавляем в localStorage переменную
+            }
+        });
+
+        // Если MediumEditor нужно добавить
+        if (localStorage.getItem('addMediumEditor') === 'true') {
+
+            addForm(region);
+            addCheckboxesToEditableElements();
+            attachCheckboxHandlers();
+            attachTextareaHandlers();
+            showPagesInPageBlockPlagin(); // Функция showPagesInPageBlockPlagin вызывается для отправки запроса на сервер и получения данных о страницах(количество и страницы)
+            checkOnlyOne(event)//Функция для обработки нажатия на чекбокс взаимоисключение
+            addPhoneNumberFunc() // Добавить номер телефона
+            searchPages() // Поиск страниц
+            editorTitleAndDescription.initialize() // Функция для редактирования Title и Description
+            changeImage.initialize()
+            changeMainColor.initialize() // Менять основной цвет
+
+
+
+            // Назначаем обработчик события для каждого чекбокса
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            allCheckboxes.forEach(function(checkbox) {
+                checkbox.addEventListener('change', checkOnlyOne);
+            });
+
+            // Добавление скрипта MediumEditor
+            const existingScript = document.querySelector('script[src="/static/assets/js/main.js"]');
+            const newScript = document.createElement('script');
+            newScript.src = "/static/assets/MediumEditor/js/medium-editor.min.js";
+            newScript.async = true;
+            existingScript.parentNode.insertBefore(newScript, existingScript);
+
+            // Добавляем стили для MediumEditor
+            const styleMediumEditor = document.createElement('link');
+            styleMediumEditor.href = "/static/assets/MediumEditor/css/medium-editor.min.css"
+            styleMediumEditor.rel = "stylesheet"
+            existingScript.parentNode.insertBefore(styleMediumEditor, existingScript)
+
+            const styleMediumEditorDefault = document.createElement('link');
+            styleMediumEditorDefault.href = "/static/assets/MediumEditor/css/default.min.css"
+            styleMediumEditorDefault.rel = "stylesheet"
+            existingScript.parentNode.insertBefore(styleMediumEditorDefault, existingScript)
+
+            //Подключаем главные стили
+            const mainCss = document.createElement('link');
+            mainCss.href = "/static/assets/css/main.css";
+            mainCss.rel = "stylesheet"
+            existingScript.parentNode.insertBefore(mainCss, existingScript);
+
+            // Удаление div с классом mainElement со всеми внутренними элементами с задержкой в 3 секунды
+            setTimeout(() => {
+                const mainElement = document.querySelector('.mainElement');
+                if (mainElement) {
+                    mainElement.remove();
+                }
+            }, 2000); // 2000 миллисекунд = 2 секунды
+
+            localStorage.removeItem('addMediumEditor');
+
+        }
+    });
+
+    window.modul = {
+        editorTitleAndDescription,
+    }
+})();
+
+
+
+
+!(function (){
+    // Функция для перетаскивания
+    function makeDraggable(...selectors) {
+        let draggedElement = null;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        document.addEventListener('mousedown', (e) => {
+            // Проверяем, был ли клик внутри элемента <textarea>,<input> или <button>
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
+                return;
+            }
+
+            // Проверяем, был ли клик внутри одного из элементов
+            for (const selector of selectors) {
+                if (e.target.closest(selector)) {
+                    draggedElement = selector.startsWith("#") ? document.getElementById(selector.substring(1)) : e.target.closest(selector);
+                    const rect = draggedElement.getBoundingClientRect();
+                    offsetX = e.clientX - rect.left;
+                    offsetY = e.clientY - rect.top;
+                    break; // Если найден элемент для перетаскивания, выходим из цикла
+                }
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (draggedElement) {
+                draggedElement.style.left = (e.clientX - offsetX) + 'px';
+                draggedElement.style.top = (e.clientY - offsetY) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            draggedElement = null;
+        });
+    }
+    // Использование функции для перетаскивания
+    makeDraggable('#selection-form', '.blockWithPagesEditingMode','.formAddDomains__Wrapper', '.formAddBots__Wrapper' ,'.modal', '.editorTitleAndDescriptionWrapper');
+
+})();
+
+!(function () {
+// Поиск доменов
+    function searchDomains() {
+        // Установка обработчика событий на ввод в поле поиска
+        const searchDomains = document.querySelector('#searchDomains');
+        if(searchDomains){
+            searchDomains.oninput = function (){
+                // Получение введенного значения и выборка всех элементов ссылок в таблице
+                let val = this.value.trim(),
+                    allDomains = document.querySelectorAll('.allDomains__tbody tr td a'),
+                    found = false; // Переменная для отслеживания наличия совпадений
+
+                // Проверка, не пуст ли введенный запрос
+                if(val !== ''){
+                    // Перебор всех элементов ссылок
+                    allDomains.forEach(function(elem) {
+                        let row = elem.closest('tr'); // Находим ближайший родительский элемент 'tr' для ссылки
+                        // Проверка, соответствует ли текст ссылки запросу
+                        if(elem.innerText.search(val) === -1){
+                            row.classList.add('hide'); // Скрываем строку, если нет совпадения
+                        }
+                        else {
+                            found = true; // Устанавливаем флаг в true, если найдено совпадение
+                            row.classList.remove('hide'); // Показываем строку, если есть совпадение
+                            let str = elem.innerText;
+                            // Вызываем функцию для выделения найденного текста
+                            elem.innerHTML = insertMark(str, elem.innerText.search(val), val.length);
+                        }
+                    });
+                    // Установка видимости сообщения об отсутствии результатов
+                    document.getElementById('noResultsMessage').style.display = found ? 'none' : 'block';
+                }
+                else {
+                    // Если запрос пуст, показываем все строки и сбрасываем изменения в тексте ссылок
+                    allDomains.forEach(function(elem) {
+                        let row = elem.closest('tr');
+                        row.classList.remove('hide');
+                        elem.innerHTML = elem.innerText;
+                    });
+                    // Скрываем сообщение об отсутствии результатов
+                    document.getElementById('noResultsMessage').style.display = 'none';
+                }
+            }
+        }
+    }
+    searchDomains();
+// Вспомогательная функция для формы поиска доменов подсвечивает буквы
+    function insertMark(string,pos,len){
+        return string.slice(0,pos) + '<mark>' + string.slice(pos, pos + len) + '</mark>' + string.slice(pos + len);
+    }
+
+// Показывает количество доменов в бд
+    function numberOfDomains(){
+        let allDomains = document.querySelectorAll('.allDomains__tbody tr td a'),
+            numberOfDomains = document.querySelector('.numberOfDomains');
+        if(allDomains && numberOfDomains) {
+            numberOfDomains.textContent = allDomains.length;
+        }
+    }
+    numberOfDomains()
+
+// Показать форму добавить домен
+    function showAddDomainForm(){
+        const btnPlusAddDomains = document.querySelector('.plusAddDomains'),// Кнопка показать форму
+              formAddDomains__Wrapper = document.querySelector('.formAddDomains__Wrapper'),// получаем саму форму
+              allDomainsMain = document.querySelector('.allDomainsMain'),// получаем тег main
+              btnCloseTheForm = document.querySelector('.btnCloseTheForm'); // кнопка закрыть форму
+
+        if(btnPlusAddDomains && formAddDomains__Wrapper){
+            btnPlusAddDomains.addEventListener('click', () => {
+                formAddDomains__Wrapper.style.display = "flex";
+                allDomainsMain.classList.add('allDomainsMainBefore');
+            })
+
+            btnCloseTheForm.addEventListener('click', () => {
+                formAddDomains__Wrapper.style.display = "none";
+                allDomainsMain.classList.remove('allDomainsMainBefore');
+            })
+        }
+    }
+    showAddDomainForm()
+
+// Валидация формы
+    function formValidation(){
+        // Находим кнопку "ДОБАВИТЬ" и добавляем к ней обработчик клика
+        const btnAddDomain = document.querySelector('.btnAddDomain');
+        if(btnAddDomain){
+            btnAddDomain.addEventListener('click', function (event) {
+                // Предотвращаем стандартное поведение формы
+                event.preventDefault();
+                spinnerDomains()
+
+                // Находим поля ввода
+                let inputDomain = document.querySelector('.formAddDomains__input[type="text"][name="nameDomain"]'),
+                    inputLanguage = document.querySelector('.formAddDomains__input[name="languageDomain"]'); // Обновите селектор, если имя поля для языка отличается
+
+                // Проверяем, пустые ли поля
+                if (inputDomain.value.trim() === '' || inputLanguage.value.trim() === '') {
+                    removeSpinnerDomains()
+                    alert('Пожалуйста, заполните домен без http и слешей.');
+                    return; // Прекращаем выполнение, если одно из полей пустое
+                }
+
+                // Проверка на дубликаты
+                let allDomains = document.querySelectorAll('.allDomains__tbody tr td a');
+                for(let elem of allDomains) {
+                    if(elem.textContent === inputDomain.value){
+                        removeSpinnerDomains()
+                        alert(`Такой домен уже есть в базе ${elem}`)
+                        return;
+                    }
+                }
+                // Отправляем форму или выполняем другие действия
+                addDomainToDatabase(inputDomain,inputLanguage)
+            });
+        }
+    }
+    formValidation()
+
+// Добавить домен в бд
+    function addDomainToDatabase(inputDomain,inputLanguage) {
+        const newDomain = new FormData(); // Создаем объект FormData
+
+        newDomain.append('newUrl', inputDomain.value);
+        newDomain.append('lang', inputLanguage.value);
+
+        // Если форма валидна, отправляем ее данные на сервер
+        fetch("/addANewDomainToTheDatabase", {
+            method: 'POST',// Метод отправки данных - POST
+            body: newDomain // Тело запроса - данные формы
+        }).then(response => {
+            if(!response.ok){
+                removeSpinnerDomains()
+                alert(`Ошибка: не найдены серверы имен или оно уже занято, ${Error(response.statusText)}`)// В случае ошибки выводим ее в alert
+            }
+            return response.json()
+        }).then(serverMessage => {
+                // Отправляем информацию о добавленном домене в группу Telegram
+                fetch('/handleformtelegraminfo',{
+                    method: 'POST',
+                    body: newDomain
+                }).then(response => {
+                    console.log("Информация отправлена")
+                }).catch(error => {
+                    console.log("Ошибка при отправке информации", error)
+                })
+
+            // При успешном отправке формы
+            document.querySelector('.formAddDomains__Wrapper').style.display = "none";// получаем саму форму
+            removeSpinnerDomains()
+            successfulResponse(...serverMessage)
+
+        }).catch(error => {
+            removeSpinnerDomains()
+            alert('Ошибка при отправке данных формы', error)// В случае ошибки выводим ее в alert
+        })
+    }
+
+// Вызывается при успешном ответе при добавлении доменов
+    function successfulResponse(dnsNameOne,dnsNameTwo) {
+        const  newDnsNameOne = document.querySelector('.formAddDomains__responseNameServersNewOne'),
+            newDnsNameTwo = document.querySelector('.formAddDomains__responseNameServersNewTwo'),
+            formAddDomainsResponse = document.querySelector('.formAddDomains__response'),
+            formAddDomainsResponseClearBtn = document.querySelector('.formAddDomains__responseClearBtn');
+        formAddDomainsResponse.style.display = 'flex';
+        newDnsNameOne.textContent = dnsNameOne;
+        newDnsNameTwo.textContent = dnsNameTwo;
+
+        formAddDomainsResponseClearBtn.addEventListener('click', () => {
+            formAddDomainsResponse.style.display = 'none';
+            window.location.reload() // Перезагружаем страницу
+        })
+    }
+
+// Проверить статус всех доменов в бд
+    function checkTheStatusOfAllDomains() {
+        if (window.location.href.includes('/domains')) {
+            // Показать спиннер
+            spinnerDomains()
+            fetch("/updatesTheStatusOfAllDomains", {
+                method: 'POST'
+            }).then(response => {
+                if(!response.ok) throw new Error(response.status)
+            }).then(() => {
+                // Убрать спиннер
+                removeSpinnerDomains()
+            }).catch(error => {
+                console.log("Ошибка запроса", error)
+            })
+        }
+    }
+    checkTheStatusOfAllDomains()
+
+// Спиннер для доменов
+    function spinnerDomains() {
+        const spinner = document.getElementById("spinnerDomains");
+        if(spinner){
+            spinner.style.display = "block"
+        }
+    }
+    function removeSpinnerDomains() {
+        const spinner = document.getElementById("spinnerDomains");
+        if(spinner){
+            spinner.style.display = "none"
+        }
+    }
+
+// Сделать имя сайта заголовком
+    let NameCategory, CurrentSiteName // Глобальная переменная которая содержит текущую категорию название сайта
+    function makeSiteNameHeader() {
+        document.body.addEventListener('click', function (e) {
+            if (e.target.classList.contains('flush__select')) {
+                // Находим все заголовки аккордеона
+                const accordionHeaders = document.querySelectorAll('.accordion-header');
+
+                accordionHeaders.forEach(header => {
+                    // Находим соответствующий контент аккордеона
+                    const accordionContent = header.nextElementSibling;
+
+                    // Проверяем, содержит ли контент аккордеона нажатую кнопку
+                    if (accordionContent.contains(e.target)) {
+                        // Находим nameCategory и nameElement
+                        const nameCategory = header.querySelector('.nameCategory');
+                        const parentLi = e.target.closest('.flush__li');
+                        const nameElement = parentLi.querySelector('.flush__name');
+                        NameCategory = nameCategory.textContent
+                        CurrentSiteName = nameElement.textContent
+                        // Находим и обновляем заголовок модального окна
+                        const modalTitleSiteName = document.querySelector('.modalTitleSiteName');
+                        if (nameCategory && nameElement) {
+                            modalTitleSiteName.innerHTML = `<span>${nameCategory.textContent}</span> - ${nameElement.textContent}`;
+                        }
+                    }
+                });
+            }
+        });
+    }
+    makeSiteNameHeader();
+
+// Подставляем выбранное имя в select
+    function substitutesTheSelectedNameIntoSelect() {
+        const formSelect = document.querySelector('.form-select'),
+              btnCheckDomain = document.querySelector('.btnCheckDomain'),
+              dropdownMenu = document.querySelector('.dropdown-menu');
+        if(formSelect){
+            formSelect.addEventListener('click', function (e){
+                btnCheckDomain.textContent = e.target.textContent
+                dropdownMenu.classList.toggle('show')
+            })
+            btnCheckDomain.addEventListener('click', () => {
+                    const searchDomainsUsed = document.querySelector('.searchDomainsUsed');
+                    if (searchDomainsUsed) {
+                        searchDomainsUsed.focus();
+                    }
+            });
+        }
+    }
+    substitutesTheSelectedNameIntoSelect()
+
+// Закрыть форму btnCloseTheFormConnect
+    function btnCloseTheFormConnect() {
+        const btnCloseTheFormConnect = document.querySelector('.btnCloseTheFormConnect'),
+              btnCheckDomain = document.querySelector('.btnCheckDomain');
+        if(btnCloseTheFormConnect) {
+            btnCloseTheFormConnect.addEventListener('click', () => {
+                const span = document.createElement('span')
+                span.textContent = 'ВЫБЕРИТЕ ДОМЕН'
+                btnCheckDomain.textContent = ''
+                btnCheckDomain.appendChild(span)
+            })
+        }
+    }
+    btnCloseTheFormConnect()
+
+//Получаем из бд свободные домены
+    function gettingFreeDomainsFromTheDatabase(){
+        document.body.addEventListener('click', function (e) {
+            if (e.target.classList.contains('flush__select')){
+                const allSitesBox =  e.target.closest('.allSites__box'),
+                    formSelect = allSitesBox.querySelector('.form-select'),
+                    dropdownMenu = document.querySelector('.dropdown-menu'),
+                    searchDomainsUsed = document.querySelector('.searchDomainsUsed');
+                    formSelect.textContent = '' // Каждый раз очищаем форму.
+                // Добавляем input для поиска в выпадающее меню
+                const input = document.createElement('input');
+                    input.type = 'search';
+                    input.name = 'searchDomainsUsed';
+                    input.classList.add('searchDomainsUsed');
+                    dropdownMenu.appendChild(input);
+
+                    // Делаем запрос на сервер
+                    fetch("/gettingfreedomainsfromthedatabase", {
+                        method: 'POST'
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Добавляем option
+                            data.forEach(domain => {
+                                const option = document.createElement('option');
+                                option.textContent += domain.site
+                                formSelect.appendChild(option)
+                            })
+                        })
+                        .catch(error => console.error(error))
+                // Поиск свободных доменов
+               setTimeout(() => {
+                   searchDomainsNoUsed();
+               },1000)
+
+                // Удаляем поля поиска чтобы не было дубликатов
+                if(searchDomainsUsed){
+                    searchDomainsUsed.remove()
+                }
+            }
+        })
+    }
+    gettingFreeDomainsFromTheDatabase()
+
+// Поиск свободных доменов
+    function searchDomainsNoUsed() {
+        // Установка обработчика событий на ввод в поле поиска
+        const searchDomainsUsed = document.querySelector('.searchDomainsUsed');
+        if(searchDomainsUsed){
+            searchDomainsUsed.oninput = function (){
+                // Получение введенного значения и выборка всех элементов
+                let val = this.value.trim(),
+                    allDomains = document.querySelectorAll('option'),
+                    found = false; // Переменная для отслеживания наличия совпадений
+
+                // Проверка, не пуст ли введенный запрос
+                if(val !== ''){
+                    // Перебор всех элементов
+                    allDomains.forEach(function(elem) {
+                        // Проверка, соответствует ли текст запросу
+                        if(elem.innerText.search(val) === -1){
+                            elem.classList.add('hide'); // Скрываем строку, если нет совпадения
+                        }
+                        else {
+                            found = true; // Устанавливаем флаг в true, если найдено совпадение
+                            elem.classList.remove('hide'); // Показываем строку, если есть совпадение
+                            elem.style.backgroundColor = "yellow"; // Изменение фона, если есть совпадение
+                        }
+                    });
+                }
+                else {
+                    // Если запрос пуст, показываем все строки и сбрасываем изменения в тексте
+                    allDomains.forEach(function(elem) {
+                        elem.classList.remove('hide');
+                        elem.innerHTML = elem.innerText;
+                        elem.style.backgroundColor = "#fff"; // Изменение фона, если есть совпадение
+                    });
+                }
+            }
+        }
+    }
+
+// Привязать домен к сайту
+    function linkDomainToSite() {
+        const btnConnectDomain = document.querySelector('.btnConnectDomain'),
+              btnCheckDomain = document.querySelector('.btnCheckDomain');
+        var baseUrl = window.location.origin;
+        if(btnConnectDomain){
+            btnConnectDomain.addEventListener('click', () => {
+                // Проверка на пустоту
+                if(btnCheckDomain.innerHTML.includes('<span>')){
+                    alert("Выберите домен")
+                    return
+                }
+                // Показать спиннер
+                spinnerDomains()
+                // Запрос на сервер
+                fetch("/createaconfigfile", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nameDomain: btnCheckDomain.textContent,
+                        nameCategory: NameCategory,
+                        currentSiteName: CurrentSiteName,
+                        baseUrl: baseUrl
+                    })
+                }).then(response => {
+                    if(!response.ok){
+                        // Скрыть спиннер
+                        removeSpinnerDomains()
+                        window.location.reload()
+                        throw new Error(`HTTP-ошибка! Код ошибки: ${response.status}`)
+                    }
+                    // return response.json()
+                }).then(() => {
+                    // Если все хорошо перезагружаем страницу
+                    window.location.reload()
+                }).catch(error => {
+                    console.log('Ошибка', error.message)
+                })
+            })
+        }
+    }
+    linkDomainToSite()
+
+})()
+
+    
+//Группа функция для копирования и перемещения блоков
+!(function () {
+    // Получаем текущий url
+    var url = window.location.href;  // Получаем текущий URL
+    var parts = url.split("/")
+    var pageName = parts[parts.length - 1]; // Получаем последнюю часть URL
+    var index = parts.indexOf('sites');
+    if (index !== -1 && parts.length > index + 2) {
+        var region = parts[index + 1];
+        var service = parts[index + 2]
+    }
+    // делаем глобальные переменные для доступа
+    let currentSectionAttributG,
+        maximumArrayValueG,
+        prevSectionAttributG,
+        nextSectionAttributG,
+        newAttributeGlobal,
+        deleteSection
+
+
+    // Когда происходит change в section
+    document.body.addEventListener('change', function (e)
+    {
+        if(e.target.classList.contains('actionSelectEditCopyMove')){
+            const saveButton = document.querySelector('#saveButton'),
+            editorTitleAndDescriptionWrapper = document.querySelector('.editorTitleAndDescriptionWrapper');
+            const selectedValue = e.target.value
+
+            if (selectedValue === 'edit') {
+                // Действия для "Редактор"
+                console.log('Выбран Редактор');
+
+                // Показываем кнопку Сохранить
+                saveButton.style.display = 'block'
+                editorTitleAndDescriptionWrapper.style.display = 'block'
+
+                // Удалить кнопки дублирования
+                removeDuplicateButtons()
+                // Удалить кнопки Удалить
+                removeDeleteButtons()
+
+                // Удаляет атрибут draggable
+                removesAnAttributeDraggable()
+
+                // Удалить кнопки draggable
+                removeDragGableButtons()
+            } else if (selectedValue === 'copy') {
+                // Действия для "Копировать"
+                console.log('Выбрана опция Копировать');
+
+                // Скрываем кнопку Сохранить
+                saveButton.style.display = 'none'
+                editorTitleAndDescriptionWrapper.style.display = 'none'
+
+                // Добавляет кнопку дублирования ко всем section на странице
+                addsADuplicateButton()
+
+                // Удаляет атрибут draggable
+                removesAnAttributeDraggable()
+
+                // Удалить кнопки draggable
+                removeDragGableButtons()
+
+                // Удалить кнопки Удалить
+                removeDeleteButtons()
+            } else if (selectedValue === 'move') {
+                // Действия для "Переместить"
+                console.log('Выбрана опция Переместить');
+
+                // Скрываем кнопку Сохранить
+                saveButton.style.display = 'none'
+                editorTitleAndDescriptionWrapper.style.display = 'none'
+
+
+                // Удалить кнопки дублирования
+                removeDuplicateButtons()
+                // Удалить кнопки Удалить
+                removeDeleteButtons()
+
+                // Делает блоки перетаскиваемыми
+                makesBlocksDraggable()
+            } else if (selectedValue === 'delete'){
+                // Действия для "Переместить"
+                console.log('Выбрана опция Удалить');
+
+                // Скрываем кнопку Сохранить
+                saveButton.style.display = 'none'
+                editorTitleAndDescriptionWrapper.style.display = 'none'
+
+                // Удалить кнопки дублирования
+                removeDuplicateButtons()
+
+                // Удаляет атрибут draggable
+                removesAnAttributeDraggable()
+
+                // Удалить кнопки draggable
+                removeDragGableButtons()
+
+                // Добавляет кнопку Удалить ко всем добавленным section на странице
+                addsADeleteButton()
+            }
+            
+
+        }
+    })
+
+// Добавляет кнопку дублирования ко всем section на странице
+    function addsADuplicateButton() {
+        // Получаем все элементы 'section' внутри элемента 'main'
+        const sections = document.querySelectorAll('main section'),
+            btnDuplicate = document.querySelector('.btnDuplicate');
+        if(!btnDuplicate){ // Проверяем добавлены ли кнопки
+            // Проходим по каждому найденному элементу 'section'
+            sections.forEach(section => {
+                // Проверяем, не имеет ли элемент классов 'forms', 'btnFixedD', 'btnFixed', 'loadTheFormFixed'
+                if(!section.classList.contains('forms')
+                    && !section.classList.contains('btnFixedD')
+                    && !section.classList.contains('btnFixed')
+                    && !section.classList.contains('loadTheFormFixed')) {
+                    // Создаем новую кнопку
+                    const copyButton = document.createElement('button');
+                    // Устанавливаем текст кнопки
+                    copyButton.textContent = 'Дублировать';
+                    copyButton.classList.add('btnDuplicate')
+
+                    // Добавляем обработчик событий на клик по кнопке
+                    copyButton.addEventListener('click', () => {
+
+                        let maximumArrayValue = findsClassesCheckbox()// максимальное значение массива
+
+                        // Клонируем текущий элемент 'section'. Аргумент 'true' указывает на необходимость клонирования всех дочерних элементов
+                        const clone = section.cloneNode(true);
+
+                        // Обновляем класс checkbox
+                        updateClassesCheckbox(clone, maximumArrayValue)
+
+                        // Вставляем клонированный элемент в DOM, сразу после текущего элемента 'section'
+                        section.parentNode.insertBefore(clone, section.nextSibling);
+                    });
+
+                    // Вставляем кнопку в DOM перед текущим элементом 'section'
+                    section.parentNode.insertBefore(copyButton, section);
+                }
+            })
+        }
+
+    }
+
+// Добавляет кнопку Удалить ко всем добавленным section на странице
+    function addsADeleteButton() {
+        // Получаем все элементы 'section' внутри элемента 'main'
+        const sections = document.querySelectorAll('main section'),
+            btnDelete = document.querySelector('.btnDelete');
+        if(!btnDelete){ // Проверяем добавлены ли кнопки
+            // Проходим по каждому найденному элементу 'section'
+            sections.forEach(section => {
+                // Проверяем, не имеет ли элемент классов 'forms', 'btnFixedD', 'btnFixed', 'loadTheFormFixed'
+                if(!section.classList.contains('forms')
+                    && !section.classList.contains('btnFixedD')
+                    && !section.classList.contains('btnFixed')
+                    && !section.classList.contains('loadTheFormFixed')) {
+                    // Создаем новую кнопку
+                    const deleteButton = document.createElement('button');
+                    // Устанавливаем текст кнопки
+                    deleteButton.textContent = 'Удалить';
+                    deleteButton.classList.add('btnDelete')
+
+                    // Добавляем обработчик событий на клик по кнопке
+                    deleteButton.addEventListener('click', () => {
+                        deleteSection = deleteButton.nextElementSibling.dataset.datasection
+                        console.log(deleteSection)
+                        deleteButton.nextElementSibling.remove() // Удаляем следущий элемент после кнопки
+                        deleteButton.remove() // Удаляем саму кнопку
+
+                    });
+
+                    // Вставляем кнопку в DOM перед текущим элементом 'section'
+                    section.parentNode.insertBefore(deleteButton, section);
+                }
+            })
+        }
+
+    }    
+
+// Удалить кнопки дублирования
+    function removeDuplicateButtons() {
+        const btnDuplicate = document.querySelectorAll('.btnDuplicate');
+        if(btnDuplicate){
+            btnDuplicate.forEach(btnDuplicate => {
+                btnDuplicate.remove()
+            })
+        }
+    }
+
+// Удалить кнопки Удалить
+    function removeDeleteButtons(){
+        const btnDelete = document.querySelectorAll('.btnDelete');
+        if(btnDelete){
+            btnDelete.forEach(btnDelete => {
+                btnDelete.remove()
+            })
+        }
+        
+    }
+
+
+// Делает блоки перетаскиваемыми
+    function makesBlocksDraggable(){
+
+        const main = document.querySelector('.main'),
+            sections = document.querySelectorAll('section');
+
+        // Включаем перетаскивание
+        for (const section of sections) {
+            if(!section.classList.contains('forms')
+                && !section.classList.contains('btnFixedD')
+                && !section.classList.contains('btnFixed')
+                && !section.classList.contains('loadTheFormFixed')) {
+                section.draggable = true;
+            }
+            if(section.hasAttribute('draggable')){
+                // Создаем новую кнопку
+                const copyButton = document.createElement('button');
+                // Устанавливаем текст кнопки
+                copyButton.classList.add('btnDragGable')
+                // Вставляем кнопку в DOM перед текущим элементом 'section'
+                section.prepend(copyButton);
+                // Добавляем рамку блокам section
+                section.classList.add('borderSection')
+            }
+        }
+
+        // Вначале движения добавляем класс
+        main.addEventListener('dragstart', e => {
+            e.target.classList.add('selected');
+        })
+
+        // В конце удаляем класс
+        main.addEventListener('dragend', e => {
+            e.target.classList.remove('selected');
+            setTimeout(()=> {
+                updateAdjacentSectionAttributes(newAttributeGlobal)
+            },2000)
+        })
+
+        // В процессе перетаскивания
+        main.addEventListener('dragover', e => {
+            e.preventDefault();
+
+            autoScroll(e); // Ваша функция автоматического скроллинга
+
+            const activeElement = main.querySelector('.selected');
+            const currentElement = e.target.closest('section'); // Используем closest для поиска ближайшего подходящего элемента
+
+            // Пропускаем, если элемент не найден или если это тот же элемент
+            if (!currentElement || activeElement === currentElement) {
+                return;
+            }
+
+            // Вычисляем середину текущего элемента
+            const currentElementRect = currentElement.getBoundingClientRect();
+            const currentElementCenter = currentElementRect.y + currentElementRect.height / 2;
+
+            // Определяем, должен ли активный элемент быть перемещен вверх или вниз
+            if (e.clientY < currentElementCenter) {
+                // Если курсор выше середины, вставляем перед текущим элементом
+                if (activeElement !== currentElement.previousElementSibling) {
+                    main.insertBefore(activeElement, currentElement);
+                    activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            } else {
+                // Если курсор ниже середины, вставляем после текущего элемента
+                const nextElement = currentElement.nextElementSibling;
+                if (activeElement !== nextElement) {
+                    main.insertBefore(activeElement, nextElement);
+                    activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+ 
+        });
+    }
+
+// Удаляет атрибут draggable
+    function removesAnAttributeDraggable() {
+        const sections = document.querySelectorAll('section');
+        sections.forEach(section => {
+            section.removeAttribute('draggable')
+            section.classList.remove('borderSection')
+        })
+    }
+
+// Удалить кнопки перемещения
+    function removeDragGableButtons() {
+        const btnDragGable = document.querySelectorAll('.btnDragGable');
+        if(btnDragGable){
+            btnDragGable.forEach(btnDragGable => {
+                btnDragGable.remove()
+            })
+        }
+    }
+
+// Функция для автоматического скроллинга
+    function autoScroll(e){
+        const edgeMargin = 200; // Отступ от края
+        const scrollSpeed = 50; // Скорость скроллинга
+
+        const bottomEdge = window.innerHeight - edgeMargin;
+        const topEdge = edgeMargin;
+
+        // Скроллинг вниз
+        if (e.clientY > bottomEdge) {
+            window.scrollBy({
+                top: scrollSpeed,
+                behavior: 'smooth'
+            });
+        }
+
+        // Скроллинг вверх
+        if (e.clientY < topEdge) {
+            window.scrollBy({
+                top: -scrollSpeed,
+                behavior: 'smooth'
+            });
+        }
+    }
+
+// Находит классы checkbox
+    function findsClassesCheckbox(){
+    // Выбираем все элементы на странице
+        const allElements = document.querySelectorAll('*');
+
+    // Создаем массив для хранения чисел
+        let checkboxNumbers = [];
+
+    // Проходимся по каждому элементу
+        allElements.forEach(el => {
+            // Получаем список классов элемента
+            Array.from(el.classList).forEach(cls => {
+                // Проверяем, начинается ли класс на 'checkbox_'
+                if (cls.startsWith('checkbox_')) {
+                    // Извлекаем числовую часть класса
+                    let number = cls.slice('checkbox_'.length);
+                    checkboxNumbers.push(number);
+                }
+            });
+        });
+
+    // Сортируем массив
+        checkboxNumbers = checkboxNumbers.sort((a, b) => a - b)
+
+    // Возвращаем результат
+        return  +checkboxNumbers[checkboxNumbers.length - 1];
+
+
+    }
+
+// Обновить класс chechbox
+    function updateClassesCheckbox(currentSection, maximumArrayValue){
+        allElementSection = currentSection.querySelectorAll('*') // Выбираем все элементы из блока section
+        allElementSection.forEach(allElement => {
+            // Получаем список классов элемента
+            Array.from(allElement.classList).forEach(cls => {
+                if(cls.startsWith('checkbox_')) {
+                    // Извлекаем числовую часть класса и обновляем ее
+                    let newClassCheckbox = cls.replace(cls.slice('checkbox_'.length),++maximumArrayValue)
+
+                    allElement.classList.add(newClassCheckbox) // Добавляем обновленный класс
+                    allElement.classList.remove(cls) // Удаляем старый класс
+                }
+            })
+        })
+
+        addANewUniqueAttributeForTheSectionBlock(currentSection, maximumArrayValue) // Добавляем новый уникальный атрибут для блока section
+    }
+
+// Добавляем новый уникальный атрибут для блока section
+
+    function addANewUniqueAttributeForTheSectionBlock(currentSection, maximumArrayValue) {
+        currentSectionAttributG = currentSection.dataset.datasection
+        console.log(currentSection.dataset.datasection)
+
+        let newAttribute = 'uniqueSection-'+maximumArrayValue
+        console.log("Новый атрибут: " + newAttribute)
+
+        maximumArrayValueG = newAttribute
+        currentSection.setAttribute('data-datasection', newAttribute)
+        newAttributeGlobal = newAttribute
+
+        setTimeout(()=> {
+            updateAdjacentSectionAttributes(newAttribute)
+        },2000)
+    }
+
+// Находим соседние section до и после нового блока
+    function updateAdjacentSectionAttributes(newAttribute) {
+        let newSection = document.querySelector(`[data-datasection="${newAttribute}"]`);
+
+        if (!newSection) {
+            console.log("Новый блок не найден");
+            return;
+        }
+
+        // Находим предыдущий section
+        let prevSection = newSection.previousElementSibling;
+        while (prevSection && !prevSection.matches('section')) {
+            prevSection = prevSection.previousElementSibling;
+        }
+        prevSectionAttributG = prevSection ? prevSection.dataset.datasection : null;
+
+        // Находим следующий section
+        let nextSection = newSection.nextElementSibling;
+        while (nextSection && !nextSection.matches('section')) {
+            nextSection = nextSection.nextElementSibling;
+        }
+        nextSectionAttributG = nextSection ? nextSection.dataset.datasection : null;
+
+        console.log("Предыдущий раздел:", prevSectionAttributG);
+        console.log("Следующий раздел:", nextSectionAttributG);
+    }
+
+// Отправляет запрос на сервер для добавления нового блока на все страницы
+    function sendsARequestToTheServerToAddANewBlockToAllPages(){
+
+        let currentSectionAttribut = currentSectionAttributG, // Атрибут под которым нужно всталять блок
+            newAttribute = maximumArrayValueG; // Атрибут нового блока
+        console.log(currentSectionAttribut, newAttribute, url)
+        if(currentSectionAttribut === undefined && newAttribute === undefined && deleteSection === undefined){
+            spinner.style.display = "none";
+            window.location.reload();
+            return
+        }
+        setTimeout(() => {
+            fetch('/addsanewblocktoallpages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    newSectionId: newAttribute,
+                    insertAfter: currentSectionAttribut, // или null/undefined, если нужно вставить в начало
+                    prevSectionAttribut: prevSectionAttributG, // блок section до
+                    nextSectionAttribut: nextSectionAttributG, // блок section после
+                    deleteSection: deleteSection, // Блок который нужно удалить
+                    region: region,
+                    service: service,
+                    url: url
+                }),
+            }).then(response => {
+                if(!response.ok) {
+                    return response.text()
+                }
+            }).then(error => {
+                console.log(error)
+            }).catch(error => {
+                console.error("Ошибка при отправке данных:", error);
+            }).finally(() => {
+                spinner.style.display = "none";
+                window.location.reload();
+            })
+        },5000)
+    }
+
+// Внешний модуль
+    window.copyMovements = {
+        sendsARequestToTheServerToAddANewBlockToAllPages
+    }
+})()
+
+   // Получаем текущий url
+   var url = window.location.href;  // Получаем текущий URL
+   var parts = url.split("/")
+   var pageName = parts[parts.length - 1]; // Получаем последнюю часть URL
+   var index = parts.indexOf('sites');
+   if (index !== -1 && parts.length > index + 2) {
+       var region = parts[index + 1];
+       var service = parts[index + 2]
+   }
+
+
+// Класс Звонки
+class Calls {
+    phoneNumberSelector; // Селектор для поиска номера телефона
+    phoneNumberElement; // Элемент DOM с номером телефона
+
+    constructor(phoneNumberSelector){
+        this.phoneNumberSelector = phoneNumberSelector;
+    }
+
+    // Инициализировать
+    initialize(){ 
+        this.phoneNumberElement = document.querySelector(this.phoneNumberSelector)
+    }
+
+    // Если кликнули по номеру телефона
+    clickPhoneNumber(){
+        if(!this.phoneNumberElement){
+            this.initialize() // Инициализация при первом вызове
+        }
+
+        const phoneNumber = this.phoneNumberElement.textContent, // Номер телефона
+            url = window.location.href, // Текущий Url
+            siteLanguage = document.querySelector('html').lang, // Язык сайта
+            urlOrigin = window.origin; // Основной url
+            
+        let callshandler = 'https://axejs.org/callshandler' // обработчик на сервере
+
+        if(phoneNumber != "111222333" && window.origin != "https://axejs.org"){
+
+            const callData = {
+                phoneNumber: phoneNumber,
+                url: url,
+                siteLanguage: siteLanguage
+            }
+
+            const jsonCallData = JSON.stringify(callData) // Делаем Json
+
+            if (urlOrigin == "http://localhost:8080") {
+                callshandler = '/callshandler'
+            }
+
+            this.serverRequest(callshandler, jsonCallData)
+        }
+        
+
+    }
+
+    // Запрос на сервер 
+    serverRequest(callshandler, jsonCallData) {
+        fetch(callshandler, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            mode: 'no-cors', // Добавляем режим 'no-cors'вы не сможете прочитать содержимое ответа сервера. Этот ответ будет "opaque", то есть его содержимое будет недоступно. Вы сможете только проверить, что запрос был выполнен без ошибок.
+            body: jsonCallData
+        }).then(response => {
+            if(!response.ok){
+                throw new Error("Ошибка при отправке запроса на сервер " + response.statusText)
+            }
+        }).catch(error => {
+            // console.log(console.log('Что-то пошло не так при отправке данных на сервер в функции serverRequest: ', error))
+        })
+    }
+
+    // Выделение звонков
+    callSelection() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth() + 1; // Месяцы начинаются с 0
+        const day = today.getDate();
+
+        // Форматируем дату как "год-месяц-день"
+        // Добавляем ведущие нули к месяцу и дню, если это необходимо
+        const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+        // Вытаскиваем значения их поля дата
+        let callToday = 0
+        const callDates = document.querySelectorAll('.callDate'),
+            numberOfCallsToday = document.querySelector('.numberOfCallsToday');
+
+        callDates.forEach(callDate => {
+            const dateCall = callDate.textContent.split(" ")[0]
+            if(dateCall == formattedDate){
+                callDate.classList.add('todaysCalls')
+                numberOfCallsToday.textContent = ++callToday // Показываем количесвто звонков сегодня
+
+            }
+        })
+    }
+
+}
+const calls = new Calls(".addPhoneNumber")
+document.body.addEventListener('click', function(e){
+    if(e.target.closest('.addPhoneNumber')){
+        calls.clickPhoneNumber()
+    }
+})
+// Если текущая страница Звонки
+if(pageName === "calls"){
+    calls.callSelection()
+}
+
+
+// Класс поменять изображение
+class ChangeImage {
+    allImgSelector; // Селекто всех картинок
+    allImgElement; // Получаем все картинки
+
+
+    constructor(allImgSelector){
+        this.allImgSelector = allImgSelector
+    }
+
+    // Инициализировать
+    initialize(){
+        this.allImgElement = document.querySelectorAll(this.allImgSelector)
+
+        this.addInputs(this.allImgElement)// Выбираем все картинки и добавляем инпуты
+        this.uploadImage() // Обработка клика при выборе картинки
+        this.showFormGeneratingImgGPT() // Показать форму для генерация картинок
+        this.copyNameImg()// При клике копирует название картинки
+        
+    }
+
+    // Выбираем все картинки и добавляем инпуты
+    addInputs(allImgElement){ 
+        allImgElement.forEach(img => {
+            const imgAlt = img.alt // Alt картинки
+
+            img.style.cursor = 'pointer' // Стили для курсора
+
+            if (imgAlt.length < 10) return // Если длина alt меньше 10 символов не показывать их
+            
+            // Блок с инпутами
+            const divInput = document.createElement('div')
+            divInput.classList.add('wrpInputImg')
+            divInput.classList.add('hiden')
+            
+            // Input добавления картинки
+            const inputImg = document.createElement('input')
+            inputImg.classList.add('imgInput')
+            inputImg.type = "file"
+            inputImg.accept = "image/*"
+
+            // wrpBtnsImg обертка для кнопок
+            const wrpBtnsImg = document.createElement('div')
+            wrpBtnsImg.classList.add('wrpBtnsImg')
+            
+            // Button для подгрузки картинки
+            const inputBtn = document.createElement('button')
+            inputBtn.classList.add("inputBtn")
+            inputBtn.textContent = 'Загрузить картинку'
+
+            // Button для показа формы генерация картинок
+            const showFormGeneratingImg = document.createElement('button')
+            showFormGeneratingImg.classList.add('showFormGeneratingImg')
+            showFormGeneratingImg.textContent = 'DALL·E'
+
+            // Input добавления/изменения alt описания
+            const inputAlt = document.createElement('input')
+            inputAlt.classList.add('imgAltInput')
+            inputAlt.type = "text"
+            inputAlt.value = imgAlt
+
+            // Название картинки
+            let imgSrc = img.src.split("/")// Разбиваем путь картинки на массив и получем название картинки
+            const nameImg = document.createElement('p')
+            nameImg.classList.add('nameImg')
+            nameImg.innerHTML = "<span class='nameImg__span'>Название картинки:</span><br>" + "<span class='nameImgCopy'>" + imgSrc[imgSrc.length-1] + "</span>" + "<br><br><span class='nameImg__span'>Расширение картинки:</span><br>" + img.width + "x" + img.height
+
+
+            wrpBtnsImg.appendChild(inputBtn)
+            wrpBtnsImg.appendChild(showFormGeneratingImg)
+
+            divInput.appendChild(inputImg)
+            divInput.appendChild(wrpBtnsImg)
+            divInput.appendChild(inputAlt)
+            divInput.appendChild(nameImg)
+
+
+            img.insertAdjacentElement("beforebegin",divInput)/* ставка перед опорным элементом */
+
+            // При клике на картинку скрываем форму
+            img.addEventListener('click', (e) => {
+                const wrpInputImg = document.querySelectorAll('.wrpInputImg')
+                wrpInputImg.forEach(elem => {
+                    elem.classList.toggle('hiden')
+                })
+            })
+
+        })
+    }
+
+    // Обработка клика при выборе картинки
+    uploadImage(){
+        document.body.addEventListener('change', e =>{
+            const saveButton = document.querySelector('#saveButton'), // Кнопка сохранить
+                actionSelectEditCopyMove = document.querySelector('.actionSelectEditCopyMove'); // Кнопка редактирования
+
+            if(e.target.classList.contains('imgInput')){
+
+                //Скрываем кнопки сохранить и редактирования
+                if(saveButton.style.display != 'none'){
+                    saveButton.style.display = 'none'
+                    actionSelectEditCopyMove.style.display = 'none'
+                }
+
+                // Находим контейнер, в котором находится кнопка
+                const container = e.target.closest('.wrpInputImg'),
+                    section = e.target.closest('section');// Находим ближайший тег section
+                let sectionData, indexInputImg
+                    if (section){
+                        sectionData = section.dataset.datasection
+                        // Получаем все элементы input.imgInput внутри этой секции
+                        const [...inputElements] = section.querySelectorAll('input.imgInput');
+                            indexInputImg = inputElements.indexOf(e.target); // индек инпута картинки
+                      
+                    } else {
+                        sectionData = "null"
+                    }
+
+                // Находим следующий элемент после контейнера, который должен быть <img>
+                const nextImage = container.nextElementSibling;
+
+                // Находим input[type="file"] внутри того же контейнера
+                const inputImg = container.querySelector(".imgInput"),
+                    inputBtn = container.querySelector('.inputBtn'),
+                    imgAltInput = container.querySelector('.imgAltInput');
+
+                if(inputImg.files && inputImg.files[0]) {
+                    let reader = new FileReader()
+
+                    reader.onload = e => {
+
+                        // Устанавливаем новый src для изображения
+                        nextImage.src = e.target.result;
+
+                        inputBtn.addEventListener('click', () => {
+                            spinner.style.display = "block"
+                            this.serverRequest(inputImg.files[0], imgAltInput, nextImage, sectionData, indexInputImg)
+                        }, {once: true})// Устанавливаем обработчик на однократное выполнение
+
+                    }
+                    reader.readAsDataURL(inputImg.files[0])
+
+                }
+
+            }
+        })
+    }
+
+    // Показать форму для генерация картинок
+    showFormGeneratingImgGPT(){
+        document.body.addEventListener('click', e => {
+            if(e.target.classList.contains('showFormGeneratingImg')){
+
+                // Сначала удаляем созданные все формы
+                document.querySelectorAll('.formWrp').forEach(form => {
+                    if (form !== e.target.closest('.wrpInputImg').querySelector('.formWrp')) {
+                        form.remove();
+                    }
+                });
+
+                const container = e.target.closest('.wrpInputImg');
+                let formWrp = container.querySelector('.formWrp');
+
+                if(!formWrp){ // При первом вызове создаются элементы а после уже созданная форма просто скрывается и показывается
+                    this.createFormGeneratingImgGPT(e)// Создаем элементы для формы генерация картинок
+                }else {
+                    formWrp.classList.toggle('active')
+                }
+            }
+        })
+    }
+
+    // Создаем элементы для формы генерация картинок
+    createFormGeneratingImgGPT(e){
+         // Находим контейнер, в котором находится кнопка
+         const container = e.target.closest('.wrpInputImg');
+         let nameImgCopy = container.querySelector('.nameImgCopy').textContent;
+         nameImgCopy = nameImgCopy.split(".")
+        console.log(nameImgCopy[0])
+         // Создаем элементы формы 
+         const formWrp = document.createElement('div') // Обертка формы генерации картинок
+         formWrp.classList.add('formWrp')
+         formWrp.classList.add('active')
+
+         const textareaGPT = document.createElement('textarea') // Текстареа 
+         textareaGPT.classList.add('textareaGPT')
+         textareaGPT.name = 'textareaGPT'
+         textareaGPT.placeholder = 'Подробно опишите картинку'
+         textareaGPT.value = "Попугай на скейтборде выполняет трюк, мультяшный стиль, естественный свет, высокая детализация"
+
+         const inpNameImgGPT = document.createElement('input') // Имя картинки
+         inpNameImgGPT.classList.add('inpNameImgGPT')
+         inpNameImgGPT.type = 'text'
+         inpNameImgGPT.name = 'inpNameImgGPT'
+         inpNameImgGPT.placeholder = 'Пример название: newPicture'
+         inpNameImgGPT.value = nameImgCopy[0] // подставляем имя картинки
+
+         const inpAltImgGPT = document.createElement('input') // Alt тег
+         inpAltImgGPT.classList.add('inpAltImgGPT')
+         inpAltImgGPT.type = 'text'
+         inpAltImgGPT.name = 'inpAltImgGPT'
+         inpAltImgGPT.value = container.nextElementSibling.alt // Подставляем значения Alt тега
+
+         const imageExpansion = document.createElement('select') // select
+         imageExpansion.classList.add('imageExpansion')
+         imageExpansion.name = 'imageExpansion'
+         imageExpansion.innerHTML = `
+             <option value="256x256">256x256</option>
+             <option value="512x512">512x512</option>
+         `;
+// <!--             <option value="1024x1024">1024x1024</option>-->
+                     //  <option value="1024x1792">1024x1792</option>
+            //  <option value="1792x1024">1792x1024</option>
+
+         const radioFormat = document.createElement('div') // Радио кнопки
+         radioFormat.classList.add('radioFormat') 
+         radioFormat.innerHTML = `
+             <div class='wrpInpFormat'><input class='radioFormatInput' id='idPNG' type='radio' name='format' value='png' checked><label for='idPNG' class='radioFormatNameFormat'>PNG</label></div>
+             <div class='wrpInpFormat'><input class='radioFormatInput' id='idJPEG' type='radio' name='format' value='jpeg'><label for='idJPEG' class='radioFormatNameFormat'>JPEG</label></div>
+         `;
+
+         const wrpSelectAndFormat = document.createElement('div')// Обертка для Select и формата
+         wrpSelectAndFormat.classList.add('wrpSelectAndFormat')
+         wrpSelectAndFormat.appendChild(imageExpansion)
+         wrpSelectAndFormat.appendChild(radioFormat)
+
+         const generateImageBtn = document.createElement('button') // Кнопка сгенерировать изображение
+         generateImageBtn.classList.add('generateImageBtn')
+         generateImageBtn.textContent = 'Сгенерировать'
+
+         const uploadGeneratedImageBtn = document.createElement('button') // Кнопка для загрузки сгенерированного изображения
+         uploadGeneratedImageBtn.classList.add('uploadGeneratedImageBtn')
+         uploadGeneratedImageBtn.textContent = 'Загрузить'
+
+         const wrpBtnGenerateImg = document.createElement('div') // Контейнер для кнопок генерации картинок GPT
+         wrpBtnGenerateImg.classList.add('wrpBtnGenerateImg')
+         wrpBtnGenerateImg.appendChild(generateImageBtn)
+         wrpBtnGenerateImg.appendChild(uploadGeneratedImageBtn)
+
+
+         // Добавляем все необходимые элементы формы в обертку
+         formWrp.appendChild(textareaGPT)
+         formWrp.appendChild(inpNameImgGPT)
+         formWrp.appendChild(inpAltImgGPT)
+         formWrp.appendChild(wrpSelectAndFormat)
+         formWrp.appendChild(wrpBtnGenerateImg)
+
+         // Добавить в контейнер
+         container.appendChild(formWrp)
+
+         // Сгенерировать превью
+         this.generatePreviewGPT(e, container)
+    }
+
+    // Сгенерировать превью
+    generatePreviewGPT(e, container){
+        const generateImageBtn = document.querySelector('.generateImageBtn'), // Получаем кнопку генерации картинок
+            textareaGPT = document.querySelector('.textareaGPT'), // Описание картинки
+            inpNameImgGPT = document.querySelector('.inpNameImgGPT'), // Название картинки
+            imageExpansionSelect = document.querySelector('.imageExpansion'), // Расширение картинки
+            radioFormatInput = document.querySelectorAll('.radioFormatInput'), // Формат картинки
+            saveButton = document.querySelector('#saveButton'), // Кнопка сохранить
+            actionSelectEditCopyMove = document.querySelector('.actionSelectEditCopyMove'); // Кнопка редактирования
+
+ 
+
+
+        if(generateImageBtn) {
+            generateImageBtn.addEventListener('click', () => {
+
+                //Скрываем кнопки сохранить и редактирования
+                if(saveButton.style.display != 'none'){
+                    saveButton.style.display = 'none'
+                    actionSelectEditCopyMove.style.display = 'none'
+                }
+
+                // Убераем пробелы
+                const textareaGPTTrim = textareaGPT.value.trim(),
+                    inpNameImgGPTTrim = inpNameImgGPT.value.trim();
+
+                // Если поля не пустые
+                if(textareaGPTTrim.length != 0 && inpNameImgGPTTrim.length != 0) {
+                    // Получаем необходимые значение из формы
+                    let imageExpansionSelectValue = imageExpansionSelect.value,
+                        radioFormatInputValue;
+                    radioFormatInput.forEach(radioChecked => {
+                        if(radioChecked.checked){
+                            radioFormatInputValue = radioChecked.value
+                        }
+                    })
+
+                    // Создаем объект данных
+                    const Data = {
+                        textareaGPTTrim: textareaGPTTrim,
+                        inpNameImgGPTTrim: inpNameImgGPTTrim,
+                        imageExpansionSelectValue: imageExpansionSelectValue,
+                        radioFormatInputValue: radioFormatInputValue,
+                    }
+                    
+                    // Переобразуем в JSON
+                    const jsonData = JSON.stringify(Data)
+
+
+                    // Запрос на сервер для генерация превью
+                    spinner.style.display = "block"
+                    this.RequestServerGeneratePreviewGPT(e, jsonData, container, radioFormatInputValue)
+
+                }
+            })
+        }
+    }
+
+    // Запрос на сервер для генерация превью
+    RequestServerGeneratePreviewGPT(e, jsonData, container, radioFormatInputValue){
+        // Находим следующий элемент после контейнера, который должен быть <img>
+        let nextImage = container.nextElementSibling;
+
+        // Определяем какой формат был выбран
+        let format
+        const radios = container.querySelectorAll('.radioFormatInput');
+        for(let radio of radios) {
+            if(radio.checked){
+                format = radio.value
+            }
+        }
+      
+
+        fetch("/generatingpreviewgptdalle", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: jsonData,
+        }).then(response => {
+            if(!response.ok) {
+                throw new Error('Произошла ошибка на сервере');
+            }
+            // Показываем кнопку если запрос был успешным
+            const uploadGeneratedImageBtn = document.querySelector('.uploadGeneratedImageBtn')
+            uploadGeneratedImageBtn.style.display= 'block'
+            return response.text()
+
+        }).then(Base64 => {
+            // Сервер возврашает Base64 и устанавливаем в тег img
+            nextImage.src = `data:image/${radioFormatInputValue};base64,${Base64}`
+
+            const nameImg = container.querySelector('.inpNameImgGPT').value, // Имя картинки
+                inpAltImgGPT = container.querySelector('.inpAltImgGPT'), // Alt
+                section = e.target.closest('section');// Находим ближайший тег section
+                let sectionData, indexInputImg
+                    if (section){
+                        sectionData = section.dataset.datasection
+                        // Получаем все элементы showFormGeneratingImg внутри этой секции
+                        const [...inputElements] = section.querySelectorAll('.showFormGeneratingImg');
+                            indexInputImg = inputElements.indexOf(e.target); // индек инпута картинки
+                      
+                    } else {
+                        sectionData = "null"
+                    }
+
+
+            // Запрос на серевер для создания создания картинки от GPT
+            this.serverRequestDalleGPT(Base64, nameImg, inpAltImgGPT, nextImage, sectionData, indexInputImg, format)
+        }).catch(error => {
+            console.log(error)
+        }).finally(() => {
+            spinner.style.display = "none"
+        })
+    }
+
+    // Запрос на серевер для создания создания картинки от GPT
+    serverRequestDalleGPT(Base64, nameImg, inpAltImgGPT, nextImage, sectionData, indexInputImg, format){
+        document.body.addEventListener('click', (e) => {
+            if(e.target.classList.contains('uploadGeneratedImageBtn')){
+
+                // Конвертация Base64 в File
+                let image = this.convertBase64ToFileAndSendGPT(Base64, nameImg, format)
+                spinner.style.display = "block"
+                this.serverRequest(image, inpAltImgGPT, nextImage, sectionData, indexInputImg)
+
+            }
+        })
+    }
+
+    // Конвертация Base64 в File
+    convertBase64ToFileAndSendGPT(Base64, nameImg, format){
+
+        // Название и формат картинки
+        let nameImage = `${nameImg}.${format}`
+        let type = "image/png"
+        if(format == "jpeg"){
+            type = "image/jpeg"
+        }
+
+          // Удаление метаданных из Base64 строки
+        // const base64WithoutPrefix = Base64.split(',')[1];
+        // Конвертация Base64 в Blob
+        const bytes = atob(Base64).split('').map(char => char.charCodeAt(0));
+        const blob = new Blob([new Uint8Array(bytes)], { type: type });
+        // Создание File объекта из Blob
+        const file = new File([blob], nameImage, {
+            type: "image/png",
+            lastModified: Date.now()
+        });
+
+        return file
+
+    }
+
+    // Запрос на сервер 
+    serverRequest(image, imgAltInput, nextImage, sectionData, indexInputImg){
+        let formData = new FormData();
+
+        formData.append("image", image)// Добавляем файл
+
+        // Создаем объект с данными, который хотим отправить вместе с файлом
+        let jsonData = {
+            region: region,
+            service: service,
+            imgAltInput: imgAltInput.value,
+            sectionData: sectionData,
+            indexInputImg: indexInputImg
+        }
+
+        // Добавляем JSON данные как строку
+        formData.append("jsonData", JSON.stringify(jsonData))
+
+        fetch('/uploadimg',{
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if(response.ok){
+                return response.text()
+            }
+            throw new Error('Произошла ошибка на сервере');
+        }).then(textSrc => {
+            nextImage.src = textSrc // Возврашаю путь картинки по умолчанию
+        }).catch(error => {
+            console.log("Ошбика", error)
+        }).finally(() => {
+            spinner.style.display = "none"
+        })
+    }
+
+    // При клике копирует название картинки
+    copyNameImg(){
+        const nameImgs = document.querySelectorAll('.nameImg');
+    
+        nameImgs.forEach((nameImg, index) => {
+            nameImg.addEventListener('click', () => {
+                // Предполагаем, что элементы идут в одном и том же порядке
+                const nameImgCopy = document.querySelectorAll('.nameImgCopy')[index];
+                
+                // Получаем текст, который необходимо скопировать
+                const textCopy = nameImgCopy.innerText;
+    
+                // Используем API буфера обмена для копирования текста
+                navigator.clipboard.writeText(textCopy).then(function(){
+                    const div = document.createElement('div')
+                    div.classList.add('copyText')
+                    div.textContent = "Скопировано"
+    
+                    nameImg.appendChild(div)
+    
+                    setTimeout(() => {
+                        div.style.display = 'none'  
+                    },1000)
+                })
+
+
+            })
+        });
+    }
+    
+
+}
+const changeImage = new ChangeImage("img")
+
+// Меняем цвет блоков
+class ChangeMainColor {
+    mainColor;
+
+    constructor(mainColor){
+        this.mainColor = mainColor
+    }
+
+    // Инициализировать
+    initialize(){
+        this.chooseColor()
+    }
+
+    // Выбрать цвет
+    chooseColor() {
+        // Получаем стили корневого элемента
+        var rootStyles = getComputedStyle(document.documentElement);
+        // Получаем значение переменной --mainColor
+        var mainColor = rootStyles.getPropertyValue('--mainColor').trim();
+
+        // Обертка для цвета и кнопки
+        const mainColorWrp = document.createElement('div')
+        mainColorWrp.classList.add('mainColorWrp')
+        
+        // Создаем инпут цвета
+        const inputColor = document.createElement('input')
+        inputColor.classList.add("inputColor")
+        inputColor.type = 'color'
+        inputColor.value = mainColor
+
+        // Создаем кнопку задать цвет
+        const setColor = document.createElement('button')
+        setColor.classList.add('setColor')
+        setColor.textContent = "Задать цвет"
+
+        // Добаляем в обертку
+        mainColorWrp.appendChild(inputColor)
+        mainColorWrp.appendChild(setColor)
+
+        document.body.insertAdjacentElement('afterbegin', mainColorWrp) // Добавляем на страницу
+
+        inputColor.addEventListener('input', () => {
+            // Устонавливаем новый цвет в переменную
+            document.documentElement.style.setProperty(this.mainColor, inputColor.value)
+        })
+
+        // Действие при клике на кнопку Задать цвет
+        setColor.addEventListener('click', () => {
+
+            const ColorData = {
+                newColor: inputColor.value,
+                region: region,
+                service: service,
+            }
+    
+            const JsonColorData = JSON.stringify(ColorData)
+
+            this.serverRequest(JsonColorData)
+        })
+    }
+    // Запрос на сервер 
+    serverRequest(JsonColorData){
+        fetch("/changebasecolor", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JsonColorData,
+        })
+    }
+
+}
+const changeMainColor = new ChangeMainColor("--mainColor")
+
+// Ботс
+class Bots {
+    ID
+    isAddButtonListenerAdded = false; // Проверяем чтобы оброботчик повторно не добавлялся для кнопки Добавить
+    isCategoryChangeListenerAdded = false; // Проверяем чтобы оброботчик повторно не добавлялся
+    allDomainsMainSelector; // Обертка Main
+    allDomainsMainElement;
+    formAddBots__WrapperSelector; // Селектор
+    formAddBots__WrapperElement; // Элемент DOM
+    btnCloseTheFormBotsSelector; // Кнопка закрыть форму
+    btnCloseTheFormBotsElement;
+    formAddBots__selectСategorySelector; // Получаем поле категории
+    formAddBots__selectСategoryElement;
+    spinnerBotsSelector; // Спиннер
+    spinnerBotsElement;
+    formAddBots__selectSiteNameSelector; // Получаем Select имен сайтов
+    formAddBots__selectSiteNameElement;
+    btnAddBotsSelector; // Кнопка добавить бота в бд
+    btnAddBotsElement;
+    descriptionH2TitleTextSelector; // Описание Заголовка
+    descriptionH2TitleTextElement;
+    formAddBots__descriptionH2TitleLengthSelector; // Длина Заголовка
+    formAddBots__descriptionH2TitleLengthElement;
+    descriptionTextTextSelector; // Описания текста
+    descriptionTextTextElement;
+    formAddBots__descriptionTextLengthSelector; // Длина Текста
+    formAddBots__descriptionTextLengthElement;
+    imgYesNoSelector; // Картинка yes/no
+    imgYesNoElement;
+    descriptionImgSelector; // Описание картинки
+    descriptionImgElement;
+    strongKeysSelector; // Жирные слова yes/no
+    strongKeysElement;
+    descriptionStrongKeysSelector; // Описание жирных слов
+    descriptionStrongKeysElement;
+    linkYesNoSelector; // Ссылка  yes/no
+    linkYesNoElement;
+    descriptionLinkSelector; // Описание Ссылка
+    descriptionLinkElement;
+    numberLinksSelector; // Количество Ссылок
+    numberLinksElement;
+    descriptionListLinksSelector; // Список Ссылок
+    descriptionListLinksElement;
+    responseTime__inpSelector; // Время срабатывания бота
+    responseTime__inpElement;
+    responseTime__selectSelector; // Время срабатывания бота минуты/часы/дни
+    responseTime__selectElement;
+    
+
+    constructor(
+            allDomainsMainSelector,
+            formAddBots__WrapperSelector,
+            btnCloseTheFormBotsSelector,
+            formAddBots__selectСategorySelector,
+            spinnerBotsSelector,
+            formAddBots__selectSiteNameSelector,
+            btnAddBotsSelector,
+            descriptionH2TitleTextSelector,
+            formAddBots__descriptionH2TitleLengthSelector,
+            descriptionTextTextSelector,
+            formAddBots__descriptionTextLengthSelector,
+            imgYesNoSelector,
+            descriptionImgSelector,
+            strongKeysSelector,
+            descriptionStrongKeysSelector,
+            linkYesNoSelector,
+            descriptionLinkSelector,
+            numberLinksSelector,
+            descriptionListLinksSelector,
+            responseTime__inpSelector,
+            responseTime__selectSelector
+        ){
+            this.allDomainsMainSelector = allDomainsMainSelector
+            this.formAddBots__WrapperSelector = formAddBots__WrapperSelector
+            this.btnCloseTheFormBotsSelector = btnCloseTheFormBotsSelector
+            this.formAddBots__selectСategorySelector = formAddBots__selectСategorySelector
+            this.spinnerBotsSelector = spinnerBotsSelector
+            this.formAddBots__selectSiteNameSelector = formAddBots__selectSiteNameSelector
+            this.btnAddBotsSelector = btnAddBotsSelector
+            this.descriptionH2TitleTextSelector = descriptionH2TitleTextSelector
+            this.formAddBots__descriptionH2TitleLengthSelector = formAddBots__descriptionH2TitleLengthSelector
+            this.descriptionTextTextSelector = descriptionTextTextSelector
+            this.formAddBots__descriptionTextLengthSelector = formAddBots__descriptionTextLengthSelector
+            this.imgYesNoSelector = imgYesNoSelector
+            this.descriptionImgSelector = descriptionImgSelector
+            this.strongKeysSelector = strongKeysSelector
+            this.descriptionStrongKeysSelector = descriptionStrongKeysSelector
+            this.linkYesNoSelector = linkYesNoSelector
+            this.descriptionLinkSelector = descriptionLinkSelector
+            this.numberLinksSelector = numberLinksSelector
+            this.descriptionListLinksSelector = descriptionListLinksSelector
+            this.responseTime__inpSelector = responseTime__inpSelector
+            this.responseTime__selectSelector = responseTime__selectSelector
+    }
+
+    // Инициализировать
+    initialize(){
+
+        this.allDomainsMainElement = document.querySelector(this.allDomainsMainSelector)
+        this.formAddBots__WrapperElement = document.querySelector(this.formAddBots__WrapperSelector)
+        this.btnCloseTheFormBotsElement = document.querySelector(this.btnCloseTheFormBotsSelector)
+        this.formAddBots__selectСategoryElement = document.querySelector(this.formAddBots__selectСategorySelector)
+        this.spinnerBotsElement = document.querySelector(this.spinnerBotsSelector)
+        this.formAddBots__selectSiteNameElement = document.querySelector(this.formAddBots__selectSiteNameSelector)
+        this.btnAddBotsElement = document.querySelector(this.btnAddBotsSelector)
+        this.descriptionH2TitleTextElement = document.querySelector(this.descriptionH2TitleTextSelector)
+        this.formAddBots__descriptionH2TitleLengthElement = document.querySelector(this.formAddBots__descriptionH2TitleLengthSelector)
+        this.descriptionTextTextElement = document.querySelector(this.descriptionTextTextSelector)
+        this.formAddBots__descriptionTextLengthElement = document.querySelector(this.formAddBots__descriptionTextLengthSelector)
+        this.imgYesNoElement = document.querySelector(this.imgYesNoSelector)
+        this.descriptionImgElement = document.querySelector(this.descriptionImgSelector)
+        this.strongKeysElement = document.querySelector(this.strongKeysSelector)
+        this.descriptionStrongKeysElement = document.querySelector(this.descriptionStrongKeysSelector)
+        this.linkYesNoElement = document.querySelector(this.linkYesNoSelector)
+        this.descriptionLinkElement = document.querySelector(this.descriptionLinkSelector)
+        this.numberLinksElement = document.querySelector(this.numberLinksSelector)
+        this.descriptionListLinksElement = document.querySelector(this.descriptionListLinksSelector)
+        this.responseTime__inpElement = document.querySelector(this.responseTime__inpSelector)
+        this.responseTime__selectElement = document.querySelector(this.responseTime__selectSelector)
+
+
+        this.showBotCreationForm()  // Показать форму при клике
+        this.closeForm() // Закрыть форму создания бота
+        this.actionWhenClickingTheAddButton() // Действие при клике на кнопку добавить
+
+    }
+    // Показать форму при клике
+    showBotCreationForm(){
+        if(!this.formAddBots__WrapperElement){
+            this.initialize() // Инициализация при первом вызове
+        }
+        // Отправляет запрос для получения названий всех сайтов  в данной категории
+        this.sendsRequestGetNamesAllSitesCategory()
+        // Проверяем чтобы оброботчик повторно не добавлялся
+        if(!this.isCategoryChangeListenerAdded){
+            this.formAddBots__selectСategoryElement.addEventListener('input', () => {
+                this.sendsRequestGetNamesAllSitesCategory() // Запрос при каждом изменении категории
+            })
+            this.isCategoryChangeListenerAdded = true
+        }
+
+        this.formAddBots__WrapperElement.style.display = 'flex'
+        this.allDomainsMainElement.classList.add('allDomainsMainBefore');
+    }
+    // Закрыть форму создания бота
+    closeForm(){
+        this.btnCloseTheFormBotsElement.addEventListener('click', () => {
+            this.formAddBots__WrapperElement.style.display = 'none'
+            this.allDomainsMainElement.classList.remove('allDomainsMainBefore');
+
+            // Сброс всех полей формы к значениям по умолчанию
+            this.resetFormFields();
+
+            // При закрытии возврашаем обратно класс для кнопки Добавить
+            if( this.btnAddBotsElement.classList.contains('btnUpdateBots')){
+                this.btnAddBotsElement.classList.add('btnAddBots')
+                this.btnAddBotsElement.textContent = "Добавить"
+                this.btnAddBotsElement.classList.remove('btnUpdateBots')
+            }
+        })
+    }
+    // Функция для сброса полей формы
+    resetFormFields() {
+        // Сброс всех текстовых полей и текстовых областей
+        const textInputs = this.formAddBots__WrapperElement.querySelectorAll('input[type="text"], textarea');
+        textInputs.forEach(input => {
+            if (input.tagName === 'TEXTAREA') {
+                input.value = input.textContent.trim(); // Сброс текстовой области к значению, указанному в HTML
+            } else {
+                input.value = input.defaultValue; // Сброс текстовых полей к значению по умолчанию
+            }
+        });
+
+        // Сброс всех выпадающих списков к первому значению
+        const selectElements = this.formAddBots__WrapperElement.querySelectorAll('select');
+        selectElements.forEach(select => {
+            select.value = select.options[0].value;
+        });
+
+        // Отключение элементов, если необходимо
+        const disabledElements = this.formAddBots__WrapperElement.querySelectorAll('[disabled]');
+        disabledElements.forEach(element => {
+            element.disabled = false; // Включение элемента, если он был отключен
+            element.value = ''; // Очистка его значений
+        });
+    }
+    // Отправляет запрос для получения названий всех сайтов  в данной категории
+    sendsRequestGetNamesAllSitesCategory(){
+        this.spinnerBotsElement.style.display = "block" // Спиннер
+        this.formAddBots__selectSiteNameElement.textContent = "" // Убераем старые данные которые были добавлены
+        fetch('/botsgetnamesallsitesingivencategory', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                category: this.formAddBots__selectСategoryElement.value
+            })
+        }).then(response => {
+            if(response.ok){
+                return response.json()
+            }
+            throw new Error('Произошла ошибка на сервере');
+        }).then(json => {
+            for(let nameSite in json) {
+                const option = document.createElement('option')
+                option.value = nameSite
+                option.textContent = nameSite
+
+                this.formAddBots__selectSiteNameElement.appendChild(option)
+            }
+        }).catch(error => {
+            console.log(error)
+        }).finally(() => {
+            this.spinnerBotsElement.style.display = "none"
+        })
+
+
+    }
+    // Действие при клике на кнопку добавить Бота
+    actionWhenClickingTheAddButton(){
+        //YES/NO
+        let imgYesNo = this.imgYesNoElement, // Выбрана вставка картинки или нет
+            decrImgYesNo = this.descriptionImgElement, // Поле описание для картинки
+            strongKeys = this.strongKeysElement, // Выбрана вставка жирных слов или нет
+            descriptionStrongKeys = this.descriptionStrongKeysElement, // Поле описание для жирных слов
+            linkYesNo = this.linkYesNoElement, // Выбрана вставка ссылка или нет
+            descriptionLink = this.descriptionLinkElement, // Поле описания ссылки
+            numberLinks = this.numberLinksElement, // Количество ссылок
+            descriptionListLinks = this.descriptionListLinksElement; // Список ссылок 
+
+            // Картинка
+            imgYesNo.addEventListener('input', () => {
+                if(imgYesNo.value == "no"){
+                    decrImgYesNo.setAttribute("disabled","disabled")
+                } else {
+                    decrImgYesNo.removeAttribute("disabled")
+                }
+            })
+
+            // Жирные слова
+            strongKeys.addEventListener('input', () => {
+                if(strongKeys.value == "no") {
+                    descriptionStrongKeys.setAttribute("disabled","disabled")
+                } else {
+                    descriptionStrongKeys.removeAttribute("disabled")
+                }
+            })
+
+            // Ссылки
+            linkYesNo.addEventListener('input', () => {
+                if(linkYesNo.value == "no") {
+                    descriptionLink.setAttribute("disabled","didabled")
+                    numberLinks.setAttribute("disabled","disabled")
+                    descriptionListLinks.setAttribute("disabled","disabled")
+                } else {
+                    descriptionLink.removeAttribute("disabled")
+                    numberLinks.removeAttribute("disabled")
+                    descriptionListLinks.removeAttribute("disabled")
+                }
+            })
+
+
+        if(this.isAddButtonListenerAdded) return; // Не добавляем обработчик, если он уже был добавлен
+
+        // При отпраке формы
+        this.btnAddBotsElement.addEventListener('click', () => {
+            // Валидация формы
+            let nameSite = this.formAddBots__selectSiteNameElement.value, // Название сайта
+                dcrTitle = this.descriptionH2TitleTextElement.value.trim(), // Описание Заголовка
+                lenTitle = this.formAddBots__descriptionH2TitleLengthElement.value.trim(), // Длина Заголовка
+                text = this.descriptionTextTextElement.value.trim(), // Описание Текста
+                lenText = this.formAddBots__descriptionTextLengthElement.value.trim(), // Длина Текста
+                lenResponseTime__inp = this.responseTime__inpElement.value.trim(), // Длина времени срабатывания
+                responseTime__select = this.responseTime__selectElement.value, // Время срабатывания min/hours/days
+                categorySite = this.formAddBots__selectСategoryElement.value; // Категория сайта
+
+            // Проверка на число и на 0
+            if(isNaN(lenTitle) || isNaN(lenText) || isNaN(lenResponseTime__inp)
+            || lenTitle[0] == '0' || lenText[0] == '0' || lenResponseTime__inp[0] == '0'){
+                alert("Значение поля Длины должно быть числом больше 0")
+                return
+            }
+
+            // Проверка на пустоту
+            if(
+                !nameSite.length || !dcrTitle.length || !lenTitle.length || !text.length || !lenText.length || !lenResponseTime__inp.length
+              ) {
+                alert("Обязательные поля не могут быть пустыми")
+                return
+            }
+
+            // Проверка на пустоту необязательных полей
+            const Alert = "Если выбрано YES, необязательные поля становятся обязательными для заполнения"
+            if(imgYesNo.value == "yes"){
+                if(!decrImgYesNo.value.trim().length){
+                    alert(Alert)
+                    return
+                }
+            }
+            if(strongKeys.value == "yes"){
+                if(!descriptionStrongKeys.value.trim().length){
+                    alert(Alert)
+                    return
+                }
+            }
+            if(linkYesNo.value == "yes"){
+                if(!descriptionLink.value.trim().length || !descriptionListLinks.value.trim().length){
+                    alert(Alert)
+                    return
+                }
+            }
+
+            // Собераем значения полей в объект и переобразовываем в JSON
+            const Data = {
+                categorySite: categorySite,
+                nameSite: nameSite,
+                dcrTitle: dcrTitle,
+                lenTitle: lenTitle,
+                text: text,
+                lenText: lenText,
+                imgYesNo: imgYesNo.value,
+                decrImgYesNo: decrImgYesNo.value,
+                strongKeys: strongKeys.value,
+                descriptionStrongKeys: descriptionStrongKeys.value,
+                linkYesNo: linkYesNo.value,
+                descriptionLink: descriptionLink.value,
+                numberLinks: numberLinks.value,
+                descriptionListLinks: descriptionListLinks.value,
+                lenResponseTime__inp: lenResponseTime__inp,
+                responseTime__select: responseTime__select
+            }
+
+            const JsonData = JSON.stringify(Data)
+
+            // Проверяем что нажимаемая кнопка Добавить
+            if(this.btnAddBotsElement.classList.contains('btnAddBots')){
+                // Запрос на создание бота
+                this.requestToCreateABot(JsonData)
+            } else if(this.btnAddBotsElement.classList.contains('btnUpdateBots')) {
+                // Запрос на обновления бота
+                this.requestToUpdateABot(JsonData)
+            }
+
+        })
+
+        this.isAddButtonListenerAdded = true; // Устанавливаем флаг в true после добавления обработчика
+    }
+    // Запрос на создание бота
+    requestToCreateABot(JsonData){
+        this.spinnerBotsElement.style.display = "block" // Спиннер
+        fetch("/createbots",{
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JsonData
+        }).then(response => {
+            if(!response.ok){
+                throw new Error('Произошла ошибка на сервере');
+            }
+        }).catch(error => {
+            console.log(error)
+        }).finally(() => {
+            this.spinnerBotsElement.style.display = "none" // Спиннер
+            location.reload()
+        })
+    }
+    // Запрос на обновления бота
+    requestToUpdateABot(JsonData){
+        this.spinnerBotsElement.style.display = "block" // Спиннер
+
+        // Добавили допольнительное поле ID в json 
+        let parseJson = JSON.parse(JsonData)
+        parseJson.id = this.ID
+        JsonData = JSON.stringify(parseJson)
+
+
+        fetch("/botsediteupdatedata",{
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JsonData
+        }).then(response => {
+            if(!response.ok){
+                throw new Error('Произошла ошибка на сервере');
+            }
+        }).catch(error => {
+            console.log(error)
+        }).finally(() => {
+            this.spinnerBotsElement.style.display = "none" // Спиннер
+            location.reload()
+        })
+    }
+    // Запрос на Запуск бота
+    botsStart(idElement){
+        document.querySelector('#spinnerBots').style.display = "block"// Спиннер
+        const id = {
+            id: idElement.textContent
+        }
+
+        fetch("/botsstart",{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(id)
+        }).then(response => {
+            if(!response.ok){
+                throw new Error('Произошла ошибка на сервере');
+            }
+        }).catch(error => {
+            console.log(error)
+        }).finally(() => {
+            document.querySelector('#spinnerBots').style.display = "none"// Спиннер
+            location.reload()
+        })
+    }
+    // Запрос на Остановку бота
+    botsStop(idElement){
+        document.querySelector('#spinnerBots').style.display = "block"// Спиннер
+        const id = {
+            id: idElement.textContent
+        }
+
+        fetch("/botsstop",{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(id)
+        }).then(response => {
+            if(!response.ok){
+                throw new Error('Произошла ошибка на сервере');
+            }
+        }).catch(error => {
+            console.log(error)
+        }).finally(() => {
+            document.querySelector('#spinnerBots').style.display = "none"// Спиннер
+            location.reload()
+        })
+    }
+    // Удалить бота
+    botsDelete(idElement) {
+        if(confirm('Вы хотите удалить Бота?')){
+            document.querySelector('#spinnerBots').style.display = "block"// Спиннер
+            const id = {
+                id: idElement.textContent
+            }
+
+            fetch("/botsdelete",{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(id)
+            }).then(response => {
+                if(!response.ok){
+                    throw new Error('Произошла ошибка на сервере');
+                }
+            }).catch(error => {
+                console.log(error)
+            }).finally(() => {
+                document.querySelector('#spinnerBots').style.display = "none"// Спиннер
+                location.reload()
+            })
+        }
+    }
+    // Редактировать бота
+    botsEdite(idElement){
+        if(!this.formAddBots__WrapperElement){
+            this.initialize() // Инициализация при первом вызове
+        }
+        this.spinnerBotsElement.style.display = "block" // Спиннер
+        this.ID = idElement.textContent
+        const id = {
+            id: idElement.textContent
+        }
+
+        fetch("/botsEditeGetData",{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(id)
+        }).then(response => {
+            if(!response.ok){
+                throw new Error('Произошла ошибка на сервере');
+            }
+            return response.json()
+        }).then(data => {
+            this.insertDataIntoTheEditForm(data) // Вставляем данные в форму редактирования
+        }).catch(error => {
+            console.log(error)
+        }).finally(() => {
+            this.spinnerBotsElement.style.display = "none" // Спиннер
+        })
+
+        // Прежде чем показать форму редактирования меняем кнопку Добавить на Обновить
+        this.btnAddBotsElement.textContent = "Обновить"
+        this.btnAddBotsElement.classList.add('btnUpdateBots')
+        this.btnAddBotsElement.classList.remove('btnAddBots')
+
+        // Показывать форму редактирования
+        this.formAddBots__WrapperElement.style.display = 'flex'
+        this.allDomainsMainElement.classList.add('allDomainsMainBefore');
+
+    }
+    // Вставляем данные в форму редактирования
+    insertDataIntoTheEditForm(data){
+        // Получаем категорию и название сайта
+        let categorySite = data.CategorySite;
+        categorySite = categorySite.split('/').slice(2,4);
+        let cateSite = categorySite[0],
+            nameSite = categorySite[1];
+        
+        this.formAddBots__selectСategoryElement.value = cateSite // Категория сайта
+
+        // Название сайта
+        this.formAddBots__selectSiteNameElement.textContent = "" 
+        const option = document.createElement('option')
+        option.value = nameSite
+        option.textContent = nameSite
+        this.formAddBots__selectSiteNameElement.appendChild(option)
+
+        // Описание и длина заголовка 
+        this.descriptionH2TitleTextElement.value = data.DcrTitle
+        this.formAddBots__descriptionH2TitleLengthElement.value = data.LenTitle
+
+        // Описание и длина текста
+        this.descriptionTextTextElement.value = data.DcrText
+        this.formAddBots__descriptionTextLengthElement.value = data.LenText
+
+        // Вставка и описание картинки
+        this.imgYesNoElement.value = data.ImgYesNo
+        this.descriptionImgElement.value = data.DecrImgYesNo
+        if(data.ImgYesNo == "yes"){
+            this.descriptionImgElement.removeAttribute("disabled")
+        } else {
+            this.descriptionImgElement.setAttribute("disabled","disabled")
+        }
+
+        // Вставка и описание жирных слов
+        this.strongKeysElement.value = data.StrongKeys
+        this.descriptionStrongKeysElement.value = data.DescriptionStrongKeys
+        if(data.StrongKeys == "yes"){
+            this.descriptionStrongKeysElement.removeAttribute("disabled")
+        } else {
+            this.descriptionStrongKeysElement.setAttribute("disabled","disabled")
+        }
+
+        // Вставка, описание, количество и список ссылок
+        this.linkYesNoElement.value = data.LinkYesNo
+        this.descriptionLinkElement.value = data.DescriptionLink
+        this.numberLinksElement.value = data.NumberLinks
+        this.descriptionListLinksElement.value = data.DescriptionListLinks
+        if(data.LinkYesNo == "yes"){
+            this.descriptionLinkElement.removeAttribute("disabled")
+            this.numberLinksElement.removeAttribute("disabled")
+            this.descriptionListLinksElement.removeAttribute("disabled")
+        } else {
+            this.descriptionLinkElement.setAttribute("disabled","disabled")
+            this.numberLinksElement.setAttribute("disabled","disabled")
+            this.descriptionListLinksElement.setAttribute("disabled","disabled")
+        }
+
+        // Время страбатывания
+        let startInterval = data.StartInterval.split(" ")
+        this.responseTime__inpElement.value = startInterval[0]
+        this.responseTime__selectElement.value = startInterval[1]
+    }
+
+
+}
+const bots = new Bots(
+    ".allDomainsMain",
+    ".formAddBots__Wrapper",
+    ".btnCloseTheFormBots",
+    ".formAddBots__selectСategory",
+    "#spinnerBots",
+    ".formAddBots__selectSiteName",
+    ".btnAddBots",
+    ".descriptionH2TitleText",
+    ".formAddBots__descriptionH2TitleLength",
+    ".descriptionTextText",
+    ".formAddBots__descriptionTextLength",
+    ".imgYesNo",
+    ".descriptionImg",
+    ".strongKeys",
+    ".descriptionStrongKeys",
+    ".linkYesNo",
+    ".descriptionLink",
+    ".numberLinks",
+    ".descriptionListLinks",
+    ".responseTime__inp",
+    ".responseTime__select"
+
+)
+// При клике на кнопку показывать форму создания бота
+document.body.addEventListener('click', function(e){
+    if(e.target.closest('.plusAddBots')){
+        bots.initialize()
+    }
+})
+// Запуск бота
+document.body.addEventListener('click', e => {
+    if(e.target.closest('.startBot')){
+        const target = e.target.closest(".allBots__tbody tr")
+        if(target){
+            const idElement = target.querySelector('.id')
+            bots.botsStart(idElement)
+        }
+    }
+})
+// Остановка бота
+document.body.addEventListener('click', e => {
+    if(e.target.closest('.stopBot')){
+        const target = e.target.closest(".allBots__tbody tr")
+        if(target){
+            const idElement = target.querySelector('.id')
+            bots.botsStop(idElement)
+        }
+    }
+})
+// Удалить бота
+document.body.addEventListener('click', e => {
+    if(e.target.closest('.deleteBot')){
+        const target = e.target.closest(".allBots__tbody tr"),
+        status = target.querySelector('.status').textContent;
+        if(target && status != "started"){
+            const idElement = target.querySelector('.id')
+            bots.botsDelete(idElement)
+        } else {
+            alert("Для удаления Бот должен быть остановлен")
+        }
+    }
+})
+// Редактировать бота
+document.body.addEventListener('click', e => {
+    if(e.target.closest('.editeBot')){
+        const target = e.target.closest(".allBots__tbody tr"),
+        status = target.querySelector('.status').textContent;
+        if(target && status != "started"){
+            const idElement = target.querySelector('.id')
+            bots.botsEdite(idElement)
+        } else {
+            alert("При редактировании Бот должен быть остановлен")
+        }
+    }
+})
+
